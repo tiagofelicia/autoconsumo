@@ -1,5 +1,5 @@
 # Framework Principal
-streamlit==1.38.0
+streamlit==1.45.0
 
 # Manipulação de Dados
 pandas==2.2.3
@@ -13,7 +13,7 @@ fpdf2==2.7.9
 matplotlib==3.9.1
 
 # Componentes Interativos da Interface
-streamlit-aggrid==0.3.5
+streamlit-aggrid==1.1.4.post1
 streamlit-folium==0.21.0
 folium==0.17.0
 
