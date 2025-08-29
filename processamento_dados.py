@@ -102,7 +102,7 @@ def processar_ficheiro_consumos(ficheiro_excel):
         
         df_final.dropna(subset=['DataHora'], inplace=True)
 
-        # 5. Cálculo dos valores derivados (o "net metering" que mencionaste)
+        # 5. Cálculo dos valores derivados
         # Autoconsumo = O que a casa consumiu no total - O que foi preciso ir buscar à rede
         df_final['Autoconsumo_Settlement_kWh'] = (df_final['Consumo_Total_Casa_kWh'] - df_final['Consumo_Rede_kWh']).round(5)
         # Garante que não há valores negativos por imprecisões de float
@@ -151,7 +151,7 @@ def validar_e_juntar_ficheiros(lista_de_ficheiros):
         if min_data.date() < data_limite:
             erro_msg = (
                 f"Erro no ficheiro '{ficheiro.name}': Contém dados de '{min_data.strftime('%d/%m/%Y')}', "
-                f"que é anterior à data mínima permitida de 01/01/2025. Remova-o!"
+                f"que é anterior à data mínima permitida de 01/01/2024. Remova-o!"
             )
             return None, erro_msg
         max_data = df_individual['DataHora'].max()
