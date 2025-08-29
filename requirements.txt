@@ -1,7 +1,22 @@
-streamlit
-pandas
-streamlit-aggrid
-numpy
-beautifulsoup4
-openpyxl
-requests
+# Framework Principal
+streamlit==1.38.0
+
+# Manipulação de Dados
+pandas==2.2.3
+numpy==1.26.4
+
+# Leitura e Escrita de Ficheiros Excel
+openpyxl==3.1.4
+
+# Geração de Relatórios e Gráficos
+fpdf2==2.7.9
+matplotlib==3.9.1
+
+# Componentes Interativos da Interface
+streamlit-aggrid==0.3.5
+streamlit-folium==0.21.0
+folium==0.17.0
+
+# Comunicação com APIs e Web Scraping
+requests==2.32.3
+beautifulsoup4==4.12.3
