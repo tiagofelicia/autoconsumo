@@ -9,7 +9,6 @@ numpy==1.26.4
 openpyxl==3.1.4
 
 # Geração de Relatórios e Gráficos
-fpdf==1.7.2
 fpdf2==2.7.9
 matplotlib==3.9.1
 
