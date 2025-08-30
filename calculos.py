@@ -576,7 +576,7 @@ def simular_autoconsumo_completo(df_consumos, potencia_kwp, latitude, longitude,
     df_perfil[['mes', 'dia', 'hora']] = pd.DataFrame(df_perfil['mes_dia_hora'].tolist(), index=df_perfil.index)
     df_resultado = pd.merge(df_resultado, df_perfil[['mes', 'dia', 'hora', 'Prod_Horaria_Base']], on=['mes', 'dia', 'hora'], how='left')
     
-    df_resultado['Prod_Horaria_Base'].fillna(0, inplace=True)
+    df_resultado['Prod_Horaria_Base'] = df_resultado['Prod_Horaria_Base'].fillna(0)
     df_resultado['Producao_Solar_kWh'] = (df_resultado['Prod_Horaria_Base'] / 4.0) * potencia_kwp
 
     fator_reducao = 1 - (fator_sombra / 100.0)

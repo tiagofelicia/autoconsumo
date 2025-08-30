@@ -1405,10 +1405,10 @@ def gerar_relatorio_pdf(dados_relatorio):
         texto_financeiro = (
             f"  Custo do Investimento: {formatar_numero_pt(financeiro['custo_investimento'], 2, ' €')}\n"
             f"  Poupança Anual Estimada: {formatar_numero_pt(financeiro['poupanca_anual'], 2, ' €')}\n"
-            f"    ↳ Poupança por Autoconsumo: {formatar_numero_pt(financeiro.get('poupanca_autoconsumo', 0), 2, ' €')}\n"
-            f"    ↳ Receita Adicional por Venda: {formatar_numero_pt(financeiro.get('poupanca_venda', 0), 2, ' €')}\n"
-            f"    ↳ Preço Médio Compra: {formatar_numero_pt(financeiro['preco_medio_compra'], 4, ' €/kWh')}\n"
-            f"    ↳ Preço Médio Venda: {formatar_numero_pt(financeiro['preco_medio_venda'], 4, ' €/kWh')}\n"
+            f"    -> Poupança por Autoconsumo: {formatar_numero_pt(financeiro.get('poupanca_autoconsumo', 0), 2, ' €')}\n"
+            f"    -> Receita Adicional por Venda: {formatar_numero_pt(financeiro.get('poupanca_venda', 0), 2, ' €')}\n"
+            f"    -> Preço Médio Compra: {formatar_numero_pt(financeiro['preco_medio_compra'], 4, ' €/kWh')}\n"
+            f"    -> Preço Médio Venda: {formatar_numero_pt(financeiro['preco_medio_venda'], 4, ' €/kWh')}\n"
             f"  Payback Detalhado: {payback_str}\n"
             f"  Poupança Total em {int(projecao['anos_analise'])} anos: {formatar_numero_pt(projecao['poupanca_total_periodo'], 2, ' €')}"
         )
