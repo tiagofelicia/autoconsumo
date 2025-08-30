@@ -348,119 +348,6 @@ def df_to_excel_bytes(df):
     processed_data = output.getvalue()
     return processed_data
 
-# FUNÇÃO criar_tabela_analise_completa_html
-def criar_tabela_analise_completa_html(consumos_agregados, omie_agregados):
-    """
-    Gera uma tabela HTML detalhada, com cores personalizadas de fundo e texto.
-    """
-    
-    # --- Dicionário de Cores (ESTRUTURA MELHORADA) ---
-    cores = {
-        'header': {
-            'S':  {'bg': '#A6A6A6'},
-            'BD': {'bg': '#A9D08E'},
-            'BS': {'bg': '#8EA9DB'},
-            'TD': {'bg': '#BF8F00', 'text': '#FFFFFF'}, # <--- TEXTO BRANCO DEFINIDO AQUI
-            'TS': {'bg': '#C65911', 'text': '#FFFFFF'}  # <--- TEXTO BRANCO DEFINIDO AQUI
-        },
-        'cell': {
-            'S':    {'bg': '#D9D9D9'},
-            'BD_V': {'bg': '#C6E0B4'}, 'BD_F': {'bg': '#E2EFDA'},
-            'BS_V': {'bg': '#B4C6E7'}, 'BS_F': {'bg': '#D9E1F2'},
-            'TD_V': {'bg': '#FFD966'}, 'TD_C': {'bg': '#FFE699'}, 'TD_P': {'bg': '#FFF2CC'},
-            'TS_V': {'bg': '#F4B084'}, 'TS_C': {'bg': '#F8CBAD'}, 'TS_P': {'bg': '#FCE4D6'}
-        }
-    }
-    
-    # --- Função auxiliar para formatação de números ---
-    def fnum(n, casas_decimais=0, sufixo=""):
-        try:
-            if isinstance(n, str): n = float(n.replace(',', '.'))
-            return f"{n:,.{casas_decimais}f}".replace(",", " ") + sufixo
-        except (ValueError, TypeError):
-            return "-"
-
-    # --- Geração do CSS ---
-    html = "<style>"
-    html += ".analise-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px; font-family: sans-serif; text-align: center; }"
-    html += ".analise-table th, .analise-table td { padding: 8px 10px; border: 1px solid #999; }"
-    html += ".analise-table thead th { font-weight: bold; }"
-    html += ".analise-table .header-main { vertical-align: middle; }"
-    html += ".analise-table .row-label { text-align: left; font-weight: bold; background-color: #f8f9fa; }"
-    
-    for tipo_estilo, mapa_cores in cores.items():
-        for chave, config_cor in mapa_cores.items():
-            cor_fundo = config_cor['bg']
-            cor_texto = config_cor.get('text') # Tenta obter a cor de texto personalizada
-            
-            if not cor_texto: # Se não houver cor de texto personalizada, calcula o contraste
-                try:
-                    r, g, b = int(cor_fundo[1:3], 16), int(cor_fundo[3:5], 16), int(cor_fundo[5:7], 16)
-                    cor_texto = '#000000' if (r*0.299 + g*0.587 + b*0.114) > 140 else '#FFFFFF'
-                except:
-                    cor_texto = '#000000' # Fallback
-            
-            html += f".{tipo_estilo}-{chave} {{ background-color: {cor_fundo}; color: {cor_texto}; }}"
-    html += "</style>"
-
-    # --- 2. Extração e Cálculo de Todos os Valores ---
-    data = {}
-    total_kwh_geral = consumos_agregados.get('Simples', 0)
-    ciclos_info = {'S': ['S'], 'BD': ['V', 'F'], 'BS': ['V', 'F'], 'TD': ['V', 'C', 'P'], 'TS': ['V', 'C', 'P']}
-    for ciclo, periodos in ciclos_info.items():
-        total_consumo_ciclo = sum(consumos_agregados.get(ciclo, {}).values()) if ciclo != 'S' else total_kwh_geral
-        for periodo in periodos:
-            chave_omie = f"{ciclo}_{periodo}" if ciclo != 'S' else 'S'
-            chave_kwh = periodo if ciclo != 'S' else 'Simples'
-            kwh = consumos_agregados.get(ciclo, {}).get(periodo, 0) if ciclo != 'S' else total_kwh_geral
-            data[f"{ciclo}_{periodo}"] = {
-                'omie': omie_agregados.get(chave_omie, 0),
-                'kwh': kwh,
-                'perc': (kwh / total_consumo_ciclo * 100) if total_consumo_ciclo > 0 else (100 if ciclo == 'S' else 0)
-            }
-
-    # --- 3. Construção da Tabela HTML ---
-    def fnum(n, casas_decimais=0, sufixo=""):
-        try:
-            return f"{float(n):,.{casas_decimais}f}".replace(",", " ").replace(".", ",") + sufixo
-        except (ValueError, TypeError):
-            return "-"
-
-    def criar_celula(valor, classe, casas_decimais=0, sufixo=""):
-        return f"<td class='{classe}'>{fnum(valor, casas_decimais, sufixo)}</td>"
-    
-    html += "<table class='analise-table'>"
-    html += "<thead>"
-    html += f"<tr><th rowspan='2'></th><th rowspan='2' class='header-S'>Simples</th><th colspan='2' class='header-BD'>Bi-horário Diário</th><th colspan='2' class='header-BS'>Bi-horário Semanal</th><th colspan='3' class='header-TD'>Tri-horário Diário</th><th colspan='3' class='header-TS'>Tri-horário Semanal</th></tr>"
-    html += f"<tr class='header-sub'><th class='cell-BD_V'>Vazio</th><th class='cell-BD_F'>Fora Vazio</th><th class='cell-BS_V'>Vazio</th><th class='cell-BS_F'>Fora Vazio</th><th class='cell-TD_V'>Vazio</th><th class='cell-TD_C'>Cheias</th><th class='cell-TD_P'>Ponta</th><th class='cell-TS_V'>Vazio</th><th class='cell-TS_C'>Cheias</th><th class='cell-TS_P'>Ponta</th></tr>"
-    html += "</thead><tbody>"
-    
-    # Linha Média OMIE
-    html += '<tr><td class="row-label">Média OMIE (€/MWh)</td>'
-    html += f"{criar_celula(data['S_S']['omie'], 'cell-S', 2)}"
-    html += f"{criar_celula(data['BD_V']['omie'], 'cell-BD_V', 2)}{criar_celula(data['BD_F']['omie'], 'cell-BD_F', 2)}"
-    html += f"{criar_celula(data['BS_V']['omie'], 'cell-BS_V', 2)}{criar_celula(data['BS_F']['omie'], 'cell-BS_F', 2)}"
-    html += f"{criar_celula(data['TD_V']['omie'], 'cell-TD_V', 2)}{criar_celula(data['TD_C']['omie'], 'cell-TD_C', 2)}{criar_celula(data['TD_P']['omie'], 'cell-TD_P', 2)}"
-    html += f"{criar_celula(data['TS_V']['omie'], 'cell-TS_V', 2)}{criar_celula(data['TS_C']['omie'], 'cell-TS_C', 2)}{criar_celula(data['TS_P']['omie'], 'cell-TS_P', 2)}</tr>"
-    
-    # Linha Consumo Real (kWh)
-    html += '<tr><td class="row-label">Consumo Real (kWh)</td>'
-    html += f"{criar_celula(data['S_S']['kwh'], 'cell-S', 0)}"
-    html += f"{criar_celula(data['BD_V']['kwh'], 'cell-BD_V', 0)}{criar_celula(data['BD_F']['kwh'], 'cell-BD_F', 0)}"
-    html += f"{criar_celula(data['BS_V']['kwh'], 'cell-BS_V', 0)}{criar_celula(data['BS_F']['kwh'], 'cell-BS_F', 0)}"
-    html += f"{criar_celula(data['TD_V']['kwh'], 'cell-TD_V', 0)}{criar_celula(data['TD_C']['kwh'], 'cell-TD_C', 0)}{criar_celula(data['TD_P']['kwh'], 'cell-TD_P', 0)}"
-    html += f"{criar_celula(data['TS_V']['kwh'], 'cell-TS_V', 0)}{criar_celula(data['TS_C']['kwh'], 'cell-TS_C', 0)}{criar_celula(data['TS_P']['kwh'], 'cell-TS_P', 0)}</tr>"
-
-    # Linha Consumo %
-    html += '<tr><td class="row-label">Consumo %</td>'
-    html += f"{criar_celula(data['S_S']['perc'], 'cell-S', 1, '%')}"
-    html += f"{criar_celula(data['BD_V']['perc'], 'cell-BD_V', 1, '%')}{criar_celula(data['BD_F']['perc'], 'cell-BD_F', 1, '%')}"
-    html += f"{criar_celula(data['BS_V']['perc'], 'cell-BS_V', 1, '%')}{criar_celula(data['BS_F']['perc'], 'cell-BS_F', 1, '%')}"
-    html += f"{criar_celula(data['TD_V']['perc'], 'cell-TD_V', 1, '%')}{criar_celula(data['TD_C']['perc'], 'cell-TD_C', 1, '%')}{criar_celula(data['TD_P']['perc'], 'cell-TD_P', 1, '%')}"
-    html += f"{criar_celula(data['TS_V']['perc'], 'cell-TS_V', 1, '%')}{criar_celula(data['TS_C']['perc'], 'cell-TS_C', 1, '%')}{criar_celula(data['TS_P']['perc'], 'cell-TS_P', 1, '%')}</tr>"
-    
-    html += "</tbody></table>"
-    return html
 
 
 # --- Inicializar lista de resultados ---
@@ -810,7 +697,7 @@ if is_diagram_mode:
     st.markdown("##### Análise Detalhada de Consumos e Médias OMIE")
     consumos_agregados_brutos = proc_dados.agregar_consumos_por_periodo(df_consumos_bruto_filtrado, OMIE_CICLOS)
     omie_medios_para_tabela_bruta = proc_dados.calcular_medias_omie_para_todos_ciclos(df_consumos_bruto_filtrado, OMIE_CICLOS)
-    tabela_analise_html_bruta = criar_tabela_analise_completa_html(consumos_agregados_brutos, omie_medios_para_tabela_bruta)
+    tabela_analise_html_bruta = gfx.criar_tabela_analise_completa_html(consumos_agregados_brutos, omie_medios_para_tabela_bruta)
     st.markdown(tabela_analise_html_bruta, unsafe_allow_html=True)
 
     with st.expander("Ver Gráficos de Análise (Consumo do Ficheiro vs. OMIE)"):

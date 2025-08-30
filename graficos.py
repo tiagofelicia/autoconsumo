@@ -656,19 +656,162 @@ def preparar_dados_mensais(df_consumos, st_session_state):
         'series': series_grafico
     }
 
+# FUNÇÃO criar_tabela_analise_completa_html
+def criar_tabela_analise_completa_html(consumos_agregados, omie_agregados):
+    """
+    Gera uma tabela HTML detalhada, com cores personalizadas de fundo e texto
+    que se adaptam ao tema claro/escuro do Streamlit.
+    """
+    
+    # --- NOVO: Deteção do Tema Atual do Streamlit ---
+    is_dark_theme = st.get_option('theme.base') == 'dark'
+
+    # --- NOVO: Definição de DUAS paletas de cores ---
+    
+    # Paleta para o Tema Claro (a sua original)
+    cores_light = {
+        'header': {
+            'S':  {'bg': '#A6A6A6'}, 'BD': {'bg': '#A9D08E'}, 'BS': {'bg': '#8EA9DB'},
+            'TD': {'bg': '#BF8F00', 'text': '#FFFFFF'}, 'TS': {'bg': '#C65911', 'text': '#FFFFFF'}
+        },
+        'cell': {
+            'S':    {'bg': '#D9D9D9'},
+            'BD_V': {'bg': '#C6E0B4'}, 'BD_F': {'bg': '#E2EFDA'},
+            'BS_V': {'bg': '#B4C6E7'}, 'BS_F': {'bg': '#D9E1F2'},
+            'TD_V': {'bg': '#FFD966'}, 'TD_C': {'bg': '#FFE699'}, 'TD_P': {'bg': '#FFF2CC'},
+            'TS_V': {'bg': '#F4B084'}, 'TS_C': {'bg': '#F8CBAD'}, 'TS_P': {'bg': '#FCE4D6'}
+        }
+    }
+    
+    # Paleta para o Tema Escuro (novas cores com melhor contraste)
+    cores_dark = {
+        'header': {
+            'S':  {'bg': '#5A5A5A'}, 'BD': {'bg': '#4B6140'}, 'BS': {'bg': '#3E4C6D'},
+            'TD': {'bg': '#8C6600'}, 'TS': {'bg': '#95430D'}
+        },
+        'cell': {
+            'S':    {'bg': '#404040'},
+            'BD_V': {'bg': '#384E30'}, 'BD_F': {'bg': '#2E3F27'},
+            'BS_V': {'bg': '#2D3850'}, 'BS_F': {'bg': '#242C40'},
+            'TD_V': {'bg': '#665000'}, 'TD_C': {'bg': '#594600'}, 'TD_P': {'bg': '#4D3C00'},
+            'TS_V': {'bg': '#6F3A1D'}, 'TS_C': {'bg': '#613319'}, 'TS_P': {'bg': '#542C15'}
+        }
+    }
+
+    # --- NOVO: Selecionar a paleta e cores de base com base no tema ---
+    if is_dark_theme:
+        cores = cores_dark
+        row_label_bg = '#1E2128'   # Fundo escuro para os rótulos
+        row_label_text = '#FFFFFF' # Texto branco
+        border_color = '#3E414B'   # Borda mais escura
+    else:
+        cores = cores_light
+        row_label_bg = '#f8f9fa'   # O seu fundo claro original
+        row_label_text = '#212529' # Texto preto
+        border_color = '#999'      # A sua borda original
+
+    # --- Geração do CSS (agora usa as variáveis de cor dinâmicas) ---
+    html = "<style>"
+    html += ".analise-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px; font-family: sans-serif; text-align: center; }"
+    # --- ALTERADO: Usa a cor da borda dinâmica ---
+    html += f".analise-table th, .analise-table td {{ padding: 8px 10px; border: 1px solid {border_color}; }}"
+    html += ".analise-table thead th { font-weight: bold; }"
+    html += ".analise-table .header-main { vertical-align: middle; }"
+    # --- ALTERADO: Usa as cores de fundo e texto dinâmicas para os rótulos das linhas ---
+    html += f".analise-table .row-label {{ text-align: center; font-weight: bold; background-color: {row_label_bg}; color: {row_label_text}; }}"
+    
+    # Este loop agora usa a paleta de cores correta (clara ou escura)
+    for tipo_estilo, mapa_cores in cores.items():
+        for chave, config_cor in mapa_cores.items():
+            cor_fundo = config_cor['bg']
+            cor_texto = config_cor.get('text')
+            
+            if not cor_texto: # A sua lógica de contraste continua perfeita!
+                try:
+                    r, g, b = int(cor_fundo[1:3], 16), int(cor_fundo[3:5], 16), int(cor_fundo[5:7], 16)
+                    cor_texto = '#000000' if (r*0.299 + g*0.587 + b*0.114) > 140 else '#FFFFFF'
+                except:
+                    cor_texto = '#000000' if is_dark_theme else '#FFFFFF' # Fallback adaptado
+            
+            html += f".{tipo_estilo}-{chave} {{ background-color: {cor_fundo}; color: {cor_texto}; }}"
+    html += "</style>"
+
+    # --- 2. Extração e Cálculo de Todos os Valores ---
+    data = {}
+    total_kwh_geral = consumos_agregados.get('Simples', 0)
+    ciclos_info = {'S': ['S'], 'BD': ['V', 'F'], 'BS': ['V', 'F'], 'TD': ['V', 'C', 'P'], 'TS': ['V', 'C', 'P']}
+    for ciclo, periodos in ciclos_info.items():
+        total_consumo_ciclo = sum(consumos_agregados.get(ciclo, {}).values()) if ciclo != 'S' else total_kwh_geral
+        for periodo in periodos:
+            chave_omie = f"{ciclo}_{periodo}" if ciclo != 'S' else 'S'
+            chave_kwh = periodo if ciclo != 'S' else 'Simples'
+            kwh = consumos_agregados.get(ciclo, {}).get(periodo, 0) if ciclo != 'S' else total_kwh_geral
+            data[f"{ciclo}_{periodo}"] = {
+                'omie': omie_agregados.get(chave_omie, 0),
+                'kwh': kwh,
+                'perc': (kwh / total_consumo_ciclo * 100) if total_consumo_ciclo > 0 else (100 if ciclo == 'S' else 0)
+            }
+
+    # --- 3. Construção da Tabela HTML ---
+    def fnum(n, casas_decimais=0, sufixo=""):
+        try:
+            return f"{float(n):,.{casas_decimais}f}".replace(",", " ").replace(".", ",") + sufixo
+        except (ValueError, TypeError):
+            return "-"
+
+    def criar_celula(valor, classe, casas_decimais=0, sufixo=""):
+        return f"<td class='{classe}'>{fnum(valor, casas_decimais, sufixo)}</td>"
+    
+    html += "<table class='analise-table'>"
+    html += "<thead>"
+    html += f"<tr><th rowspan='2'></th><th rowspan='2' class='header-S'>Simples</th><th colspan='2' class='header-BD'>Bi-horário Diário</th><th colspan='2' class='header-BS'>Bi-horário Semanal</th><th colspan='3' class='header-TD'>Tri-horário Diário</th><th colspan='3' class='header-TS'>Tri-horário Semanal</th></tr>"
+    html += f"<tr class='header-sub'><th class='cell-BD_V'>Vazio</th><th class='cell-BD_F'>Fora Vazio</th><th class='cell-BS_V'>Vazio</th><th class='cell-BS_F'>Fora Vazio</th><th class='cell-TD_V'>Vazio</th><th class='cell-TD_C'>Cheias</th><th class='cell-TD_P'>Ponta</th><th class='cell-TS_V'>Vazio</th><th class='cell-TS_C'>Cheias</th><th class='cell-TS_P'>Ponta</th></tr>"
+    html += "</thead><tbody>"
+    
+    # Linha Média OMIE
+    html += '<tr><td class="row-label">Média OMIE (€/MWh)</td>'
+    html += f"{criar_celula(data['S_S']['omie'], 'cell-S', 2)}"
+    html += f"{criar_celula(data['BD_V']['omie'], 'cell-BD_V', 2)}{criar_celula(data['BD_F']['omie'], 'cell-BD_F', 2)}"
+    html += f"{criar_celula(data['BS_V']['omie'], 'cell-BS_V', 2)}{criar_celula(data['BS_F']['omie'], 'cell-BS_F', 2)}"
+    html += f"{criar_celula(data['TD_V']['omie'], 'cell-TD_V', 2)}{criar_celula(data['TD_C']['omie'], 'cell-TD_C', 2)}{criar_celula(data['TD_P']['omie'], 'cell-TD_P', 2)}"
+    html += f"{criar_celula(data['TS_V']['omie'], 'cell-TS_V', 2)}{criar_celula(data['TS_C']['omie'], 'cell-TS_C', 2)}{criar_celula(data['TS_P']['omie'], 'cell-TS_P', 2)}</tr>"
+    
+    # Linha Consumo Real (kWh)
+    html += '<tr><td class="row-label">Consumo Real (kWh)</td>'
+    html += f"{criar_celula(data['S_S']['kwh'], 'cell-S', 0)}"
+    html += f"{criar_celula(data['BD_V']['kwh'], 'cell-BD_V', 0)}{criar_celula(data['BD_F']['kwh'], 'cell-BD_F', 0)}"
+    html += f"{criar_celula(data['BS_V']['kwh'], 'cell-BS_V', 0)}{criar_celula(data['BS_F']['kwh'], 'cell-BS_F', 0)}"
+    html += f"{criar_celula(data['TD_V']['kwh'], 'cell-TD_V', 0)}{criar_celula(data['TD_C']['kwh'], 'cell-TD_C', 0)}{criar_celula(data['TD_P']['kwh'], 'cell-TD_P', 0)}"
+    html += f"{criar_celula(data['TS_V']['kwh'], 'cell-TS_V', 0)}{criar_celula(data['TS_C']['kwh'], 'cell-TS_C', 0)}{criar_celula(data['TS_P']['kwh'], 'cell-TS_P', 0)}</tr>"
+
+    # Linha Consumo %
+    html += '<tr><td class="row-label">Consumo %</td>'
+    html += f"{criar_celula(data['S_S']['perc'], 'cell-S', 1, '%')}"
+    html += f"{criar_celula(data['BD_V']['perc'], 'cell-BD_V', 1, '%')}{criar_celula(data['BD_F']['perc'], 'cell-BD_F', 1, '%')}"
+    html += f"{criar_celula(data['BS_V']['perc'], 'cell-BS_V', 1, '%')}{criar_celula(data['BS_F']['perc'], 'cell-BS_F', 1, '%')}"
+    html += f"{criar_celula(data['TD_V']['perc'], 'cell-TD_V', 1, '%')}{criar_celula(data['TD_C']['perc'], 'cell-TD_C', 1, '%')}{criar_celula(data['TD_P']['perc'], 'cell-TD_P', 1, '%')}"
+    html += f"{criar_celula(data['TS_V']['perc'], 'cell-TS_V', 1, '%')}{criar_celula(data['TS_C']['perc'], 'cell-TS_C', 1, '%')}{criar_celula(data['TS_P']['perc'], 'cell-TS_P', 1, '%')}</tr>"
+    
+    html += "</tbody></table>"
+    return html
 
 
 def criar_tabela_comparativa_html(consumos_agregados_inicial, consumos_agregados_simulado):
     """
-    Gera uma tabela HTML comparativa detalhada entre o consumo inicial e o simulado.
+    Gera uma tabela HTML comparativa detalhada que se adapta
+    ao tema claro/escuro do Streamlit.
     """
     
-    # --- Dicionário de Cores ---
-    cores = {
+    # --- NOVO: Deteção do Tema Atual do Streamlit ---
+    is_dark_theme = st.get_option('theme.base') == 'dark'
+
+    # --- NOVO: Definição de DUAS paletas de cores ---
+
+    # Paleta para o Tema Claro (a sua original)
+    cores_light = {
         'header': {
             'S':  {'bg': '#A6A6A6'}, 'BD': {'bg': '#A9D08E'}, 'BS': {'bg': '#8EA9DB'},
-            'TD': {'bg': '#BF8F00', 'text': '#FFFFFF'},
-            'TS': {'bg': '#C65911', 'text': '#FFFFFF'}
+            'TD': {'bg': '#BF8F00', 'text': '#FFFFFF'}, 'TS': {'bg': '#C65911', 'text': '#FFFFFF'}
         },
         'cell_light': {
             'S': {'bg': '#D9D9D9'}, 'BD_V': {'bg': '#C6E0B4'}, 'BD_F': {'bg': '#E2EFDA'},
@@ -676,7 +819,7 @@ def criar_tabela_comparativa_html(consumos_agregados_inicial, consumos_agregados
             'TD_C': {'bg': '#FFE699'}, 'TD_P': {'bg': '#FFF2CC'}, 'TS_V': {'bg': '#F4B084'},
             'TS_C': {'bg': '#F8CBAD'}, 'TS_P': {'bg': '#FCE4D6'}
         },
-        'cell_dark': {
+        'cell_dark': { # Para o efeito de linhas alternadas (zebra)
             'S': {'bg': '#C0C0C0'}, 'BD_V': {'bg': '#B5D6A3'}, 'BD_F': {'bg': '#D1E6CA'},
             'BS_V': {'bg': '#A3B8D6'}, 'BS_F': {'bg': '#C8D2E7'}, 'TD_V': {'bg': '#F0CF5A'},
             'TD_C': {'bg': '#F0D68A'}, 'TD_P': {'bg': '#F0E7BE'}, 'TS_V': {'bg': '#E9A06F'},
@@ -684,15 +827,54 @@ def criar_tabela_comparativa_html(consumos_agregados_inicial, consumos_agregados
         }
     }
 
-    # --- Geração do CSS ---
+    # Paleta para o Tema Escuro
+    cores_dark = {
+        'header': {
+            'S':  {'bg': '#5A5A5A'}, 'BD': {'bg': '#4B6140'}, 'BS': {'bg': '#3E4C6D'},
+            'TD': {'bg': '#8C6600'}, 'TS': {'bg': '#95430D'}
+        },
+        'cell_light': { # Linhas "claras" no modo escuro
+            'S': {'bg': '#333333'}, 'BD_V': {'bg': '#2E3F27'}, 'BD_F': {'bg': '#2E3F27'},
+            'BS_V': {'bg': '#242C40'}, 'BS_F': {'bg': '#242C40'}, 'TD_V': {'bg': '#4D3C00'},
+            'TD_C': {'bg': '#4D3C00'}, 'TD_P': {'bg': '#4D3C00'}, 'TS_V': {'bg': '#542C15'},
+            'TS_C': {'bg': '#542C15'}, 'TS_P': {'bg': '#542C15'}
+        },
+        'cell_dark': { # Linhas "escuras" no modo escuro (um pouco diferentes para o efeito zebra)
+            'S': {'bg': '#2C2C2C'}, 'BD_V': {'bg': '#384E30'}, 'BD_F': {'bg': '#384E30'},
+            'BS_V': {'bg': '#2D3850'}, 'BS_F': {'bg': '#2D3850'}, 'TD_V': {'bg': '#594600'},
+            'TD_C': {'bg': '#594600'}, 'TD_P': {'bg': '#594600'}, 'TS_V': {'bg': '#613319'},
+            'TS_C': {'bg': '#613319'}, 'TS_P': {'bg': '#613319'}
+        }
+    }
+
+    # --- NOVO: Selecionar a paleta e cores de base com base no tema ---
+    if is_dark_theme:
+        cores = cores_dark
+        row_label_bg = '#1E2128'
+        row_label_text = '#FFFFFF'
+        border_color = '#3E414B'
+        diff_pos_color = '#28a745'  # Verde mais vivo
+        diff_neg_color = '#FF6666'  # Vermelho claro e legível
+    else:
+        cores = cores_light
+        row_label_bg = '#f2f2f2'
+        row_label_text = '#212529'
+        border_color = '#999'
+        diff_pos_color = '#00b050'  # O seu verde original
+        diff_neg_color = '#c00000'  # O seu vermelho original
+
+    # --- Geração do CSS (agora dinâmico) ---
     html = "<style>"
     html += ".comp-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px; font-family: sans-serif; text-align: center; }"
-    html += ".comp-table th, .comp-table td { padding: 6px 8px; border: 1px solid #999; }"
+    # --- ALTERADO: Usa variáveis de cor ---
+    html += f".comp-table th, .comp-table td {{ padding: 6px 8px; border: 1px solid {border_color}; }}"
     html += ".comp-table .header-main { vertical-align: middle; }"
     html += ".comp-table .header-sub { font-weight: bold; }"
-    html += ".comp-table .row-label { text-align: left; font-weight: bold; background-color: #f2f2f2; }"
-    html += ".comp-table .diff-pos { color: #00b050; }"
-    html += ".comp-table .diff-neg { color: #c00000; }"
+    html += f".comp-table .row-label {{ text-align: center; font-weight: bold; background-color: {row_label_bg}; color: {row_label_text}; }}"
+    html += f".comp-table .diff-pos {{ color: {diff_pos_color}; }}"
+    html += f".comp-table .diff-neg {{ color: {diff_neg_color}; }}"
+    
+    # Este loop agora usa a paleta de cores correta
     for tipo_estilo, mapa_cores in cores.items():
         for chave, config_cor in mapa_cores.items():
             cor_fundo = config_cor['bg']
@@ -701,10 +883,11 @@ def criar_tabela_comparativa_html(consumos_agregados_inicial, consumos_agregados
                 try:
                     r, g, b = int(cor_fundo[1:3], 16), int(cor_fundo[3:5], 16), int(cor_fundo[5:7], 16)
                     cor_texto = '#000000' if (r*0.299 + g*0.587 + b*0.114) > 140 else '#FFFFFF'
-                except: cor_texto = '#000000'
+                except: cor_texto = '#FFFFFF' if is_dark_theme else '#000000'
+            
             if tipo_estilo == 'header': html += f".header-{chave} {{ background-color: {cor_fundo}; color: {cor_texto}; }}"
-            elif tipo_estilo == 'cell_light': html += f".cell-light-{chave} {{ background-color: {cor_fundo}; }}"
-            elif tipo_estilo == 'cell_dark': html += f".cell-dark-{chave} {{ background-color: {cor_fundo}; }}"
+            elif tipo_estilo == 'cell_light': html += f".cell-light-{chave} {{ background-color: {cor_fundo}; color: {row_label_text}; }}"
+            elif tipo_estilo == 'cell_dark': html += f".cell-dark-{chave} {{ background-color: {cor_fundo}; color: {row_label_text}; }}"
     html += "</style>"
 
     # --- Processamento dos Dados ---
