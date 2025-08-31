@@ -374,15 +374,36 @@ if st.button("🧹 Limpar e Reiniciar Simulador", help="Repõe todos os campos d
 # INÍCIO DO BLOCO - GUIA RÁPIDO
 # ##################################################################
 
-with st.expander("❓ Como Usar o Simulador (Guia Rápido)"):
+with st.expander("❓ Como Usar o Simulador (Guia Rápido)", expanded=False):
     st.markdown("""
-    Esta ferramenta ajuda-o a perceber o impacto real de um sistema de painéis solares (e baterias) no seu consumo de eletricidade.
-    
-    1.  **Carregue o Ficheiro:** No campo abaixo, carregue o seu ficheiro de diagrama de carga da E-Redes (`.xlsx`). Este ficheiro contém os seus consumos reais a cada 15 minutos.
-    2.  **Selecione o Período:** Após o carregamento, escolha as datas que pretende analisar.
-    3.  **Configure o Sistema Solar:** Na secção "Configuração do Sistema Fotovoltaico", defina a potência dos painéis (kWp), a sua localização, inclinação e orientação.
-    4.  **(Opcional) Simule uma Bateria:** Ative a simulação de baterias para perceber como o armazenamento de energia pode aumentar a sua poupança.
-    5.  **Analise os Resultados:** Explore o 'Dashboard de Resultados' para ver um resumo da produção, consumo e poupança. Navegue pelos gráficos para uma análise visual detalhada.
+    Bem-vindo! Esta ferramenta foi desenhada para o ajudar a tomar a melhor decisão sobre o seu investimento em energia solar. Siga estes 4 passos simples para descobrir o seu potencial de poupança.
+
+    #### **Passo 1: 📂 O Ponto de Partida: O Seu Consumo**
+    Tudo começa com os seus dados reais. O simulador precisa do **diagrama de carga**, um ficheiro Excel que a E-Redes disponibiliza gratuitamente e que detalha o seu consumo a cada 15 minutos.
+
+    * **Onde o encontrar?** Faça o download no Balcão Digital da E-Redes: [balcaodigital.e-redes.pt](https://balcaodigital.e-redes.pt/consumptions/history)
+    * **Como carregar?** Use o botão "Carregue o seu Diagrama de Carga" abaixo. Pode carregar vários ficheiros de períodos consecutivos; o simulador irá juntá-los automaticamente.
+
+    #### **Passo 2: ⚡ A Sua Realidade Energética**
+    Configure os detalhes do seu contrato atual para que os cálculos financeiros sejam precisos.
+
+    * **Defina a Potência e o Tarifário:** Escolha a sua potência contratada e a opção horária (Simples, Bi-horário, etc.).
+    * **Filtre o Período:** Selecione as datas de início e fim que pretende analisar. Quanto maior o período, mais fiável será a simulação anual.
+
+    #### **Passo 3: ☀️ O Seu Novo Sistema Solar (e 🔋 Bateria)**
+    Agora, vamos desenhar o seu futuro sistema de autoconsumo. Ative as caixas de seleção "Simular sistema solar" e/ou "Simular bateria".
+
+    * **Localização é Chave:** Use o mapa interativo para marcar a localização exata da sua instalação. A produção solar varia significativamente em Portugal!
+    * **Configure os Painéis:** Defina a **potência** do sistema (kWp), a **inclinação** e a **orientação** dos painéis. A orientação 0° corresponde a Sul.
+    * **Adicione uma Bateria (Opcional):** Se quiser maximizar o seu autoconsumo, experimente adicionar uma bateria, definindo a sua capacidade (kWh) e potência (kW).
+
+    #### **Passo 4: 💡 Análise e Decisão**
+    Depois de configurar o sistema, clique em **"Calcular e Visualizar Resultados"**. Explore os resultados para entender o impacto do seu investimento.
+
+    * **Dashboard de Resultados:** Veja um resumo claro da produção solar, do novo consumo da rede e, mais importante, da **poupança anual estimada** e do **tempo de retorno do investimento (Payback)**.
+    * **Gráficos Detalhados:** Analise os gráficos para perceber como a produção solar se alinha com o seu consumo ao longo do dia, da semana e do mês.
+    * **Compare Cenários:** Use o botão **"💾 Guardar Cenário"** para guardar uma simulação. Depois, altere os parâmetros (ex: adicione mais painéis ou uma bateria) e compare os resultados lado a lado.
+    * **Exporte e Partilhe:** Use os botões de download para gerar um **Relatório PDF** completo ou um ficheiro **Excel** para analisar noutras ferramentas.
     """)
 
 # ##################################################################
