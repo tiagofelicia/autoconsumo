@@ -242,7 +242,7 @@ def calcular_valor_financeiro_cenario(
             preco_medio_venda = valor_comissao
         
         elif modelo_venda == 'Indexado ao OMIE':
-            df_merged['OMIE'].fillna(0, inplace=True)
+            df_merged['OMIE'] = df_merged['OMIE'].fillna(0)
             
             if tipo_comissao == 'Percentual (%)':
                 df_merged['Preco_Venda_kWh'] = (df_merged['OMIE'] / 1000) * (1 - valor_comissao / 100)
