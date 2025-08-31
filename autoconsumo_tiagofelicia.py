@@ -348,12 +348,10 @@ def df_to_excel_bytes(df):
     processed_data = output.getvalue()
     return processed_data
 
-
-
 # --- Inicializar lista de resultados ---
 resultados_list = []
 
-# --- Título e Botão de Limpeza Geral (Layout Revisto) ---
+# --- Título e Botão de Limpeza Geral  ---
 
 # Linha 1: Logo e Título
 col_logo, col_titulo = st.columns([1, 5])
@@ -407,11 +405,11 @@ with st.expander("❓ Como Usar o Simulador (Guia Rápido)", expanded=False):
     """)
 
 # ##################################################################
-# FIM DO BLOCO - GUIA RÁPIDO
+# ###               FIM DO BLOCO - GUIA RÁPIDO                   ###
 # ##################################################################
 
 # ##################################################################
-# ### SECÇÃO EXTRA: MAPA SOLAR DE PORTUGAL                       ###
+# ###              SECÇÃO MAPA SOLAR DE PORTUGAL                 ###
 # ##################################################################
 st.subheader("🗺️ Mapa Solar Interativo de Portugal")
 
@@ -538,7 +536,7 @@ with col2:
     )
 
 # --- 1. Upload do Ficheiro de Consumo ---
-st.subheader("⚡ Carregue o seu Diagrama de Carga da E-Redes")
+st.subheader("📂 Carregue o seu Diagrama de Carga da E-Redes")
 uploaded_files = st.file_uploader(
     "Selecione um ou mais ficheiros da E-Redes (com dados a partir de 01/01/2024)", 
     type=['xlsx'], 
@@ -555,7 +553,6 @@ if uploaded_files:
     if st.session_state.get('chave_ficheiros_processados') != chave_ficheiros_atuais:
         # --- RESET AUTOMÁTICO AO CARREGAR NOVO FICHEIRO ---
         reset_app_state()
-        # --- FIM DA LINHA ADICIONADA ---
 
         with st.spinner("A processar e validar ficheiros..."):
             # Usar a nova função de validação
@@ -744,10 +741,10 @@ if is_diagram_mode:
 
 
     # --- PONTO 1: CONFIGURAÇÃO DAS SIMULAÇÕES COM CALLBACKS ---
-    simular_paineis_check = st.checkbox("Simular (novo/ampliação) sistema solar", key="chk_simular_paineis", on_change=reset_solar_callback)
+    simular_paineis_check = st.checkbox("🌱Simular (novo/ampliação) sistema solar", key="chk_simular_paineis", on_change=reset_solar_callback)
     
     pode_simular_bateria = tem_upac_existente or simular_paineis_check
-    simular_bateria_check = st.checkbox("Simular bateria de armazenamento", key="chk_simular_bateria", on_change=calcular_simulacao_callback, disabled=not pode_simular_bateria)
+    simular_bateria_check = st.checkbox("🔋Simular bateria de armazenamento", key="chk_simular_bateria", on_change=calcular_simulacao_callback, disabled=not pode_simular_bateria)
     
     simulacao_ativa = simular_paineis_check or simular_bateria_check
 
@@ -777,7 +774,7 @@ if is_diagram_mode:
                     st.session_state.solar_latitude = lat
                     st.session_state.solar_longitude = lon
 
-                    # CORREÇÃO: Ativar a flag de segurança ANTES de atualizar o distrito
+                    # Ativar a flag de segurança ANTES de atualizar o distrito
                     st.session_state['_coord_just_changed'] = True
 
                     atualizar_distrito_pelas_coords()
@@ -918,6 +915,10 @@ if is_diagram_mode:
             # Seletor de data único e partilhado
             dia_selecionado_para_grafico = st.date_input("Selecione um dia para visualizar:", value=default_day, min_value=data_inicio, max_value=data_fim, format="DD/MM/YYYY", key="date_input_grafico_diario")
 
+# ########################################### ###
+# ###       PARA DEBUG DO PROGRAMADOR         ###
+# ########################################### ###
+
             # --- BOTÕES DE DOWNLOAD (DIÁRIO E COMPLETO) ---
             #col_d1, col_d2 = st.columns(2)
 
@@ -934,7 +935,7 @@ if is_diagram_mode:
             #    )
             
             #with col_d2:
-                # --- BOTÃO NOVO PARA A SIMULAÇÃO COMPLETA ---
+                # --- BOTÃO PARA A SIMULAÇÃO COMPLETA ---
                 # Usamos o DataFrame completo que está guardado na memória da sessão
             #    df_simulacao_completa = st.session_state.df_simulado_final
             #    dados_excel_completo_bytes = df_to_excel_bytes(df_simulacao_completa)
@@ -946,6 +947,10 @@ if is_diagram_mode:
             #        use_container_width=True
             #    )
             #st.markdown("---") # Separador visual
+
+# ########################################### ###
+# ###       PARA DEBUG DO PROGRAMADOR         ###
+# ########################################### ###
 
 
             # Mostrar Gráfico Solar (se aplicável)
@@ -971,7 +976,7 @@ if is_diagram_mode:
             st.markdown("---")
             st.markdown("##### **Comparação: Cenário Atual vs. Cenário Simulado**")
             
-            # --- Lógica de cálculo unificada e corrigida ---
+            # --- Lógica de cálculo unificada ---
             analise_real = st.session_state.analise_real
             df_resultado = st.session_state.df_simulado_final
 
@@ -1180,7 +1185,7 @@ if is_diagram_mode:
 
         if simulacao_ativa and 'df_simulado_final' in st.session_state:
             
-            # --- NOVO BLOCO DE BOTÕES PARA GERIR CENÁRIOS ---
+            # --- BLOCO DE BOTÕES PARA GERIR CENÁRIOS ---
             col_b1, col_b2 = st.columns(2)
             with col_b1:
                 st.button(
@@ -1201,7 +1206,7 @@ if is_diagram_mode:
             num_cenarios = len(st.session_state.cenarios_guardados)
             if num_cenarios > 0:
                 st.success(f"✅ {num_cenarios} cenário(s) guardado(s) para comparação.")
-            # --- FIM DO NOVO BLOCO ---
+            # --- FIM DO BLOCO ---
 
         st.markdown("---")
         st.markdown("##### **Resultados Financeiros**")
@@ -1231,7 +1236,7 @@ if is_diagram_mode:
             custo_evitado_anual = custo_evitado_periodo * (365.25 / dias) if dias > 0 else 0
             receita_adicional_anual = receita_adicional_periodo * (365.25 / dias) if dias > 0 else 0
 
-            # --- ANÁLISE DE SENSIBILIDADE (NOVOS INPUTS) ---
+            # --- ANÁLISE DE SENSIBILIDADE ---
             st.markdown("##### Projeção a Longo Prazo e Análise de Sensibilidade")
             col_sens1, col_sens2 = st.columns(2)
             with col_sens1:
@@ -1262,7 +1267,7 @@ if is_diagram_mode:
             
             st.markdown("---") # Separador visual
 
-            # --- COMPARAÇÃO FINANCEIRA DINÂMICA (COM CORREÇÕES) ---
+            # --- COMPARAÇÃO FINANCEIRA DINÂMICA ---
             # 1. Juntar a simulação atual com os cenários guardados
             simulacao_atual_dict = st.session_state.metricas_simulacao_atual
             todos_os_cenarios = [simulacao_atual_dict] + st.session_state.cenarios_guardados
@@ -1270,17 +1275,16 @@ if is_diagram_mode:
             # 2. Criar colunas dinamicamente (1 para o Atual + 1 para cada cenário)
             colunas_financeiras = st.columns(1 + len(todos_os_cenarios))
 
-            # Lista para guardar os dados do payback para o novo gráfico
+            # Lista para guardar os dados do payback para o gráfico
             dados_para_grafico_payback = []
 
-            # --- LÓGICA CORRIGIDA PARA A ETIQUETA ---
+            # --- LÓGICA PARA A ETIQUETA ---
             if tem_upac_existente:
                 # Se já havia UPAC, a poupança é "Adicional"
                 poupanca_label = f"Poupança Base Adicional Anual"
             else:
                 # Se não havia UPAC, a poupança é a "da UPAC"
                 poupanca_label = f"Poupança Base Anual da UPAC"
-           # --- FIM DA LÓGICA CORRIGIDA ---
 
             # 3. Apresentar o Cenário Atual na primeira coluna
             with colunas_financeiras[0]:
@@ -1324,7 +1328,7 @@ if is_diagram_mode:
             # Iterar e apresentar cada cenário simulado
             for i, cenario in enumerate(todos_os_cenarios):
                 with colunas_financeiras[i + 1]:
-                    # CORREÇÃO: A "Simulação Atual" é a primeira da lista (índice 0)
+                    # A "Simulação Atual" é a primeira da lista (índice 0)
                     custo_instalacao_cenario = st.session_state.custo_instalacao if i == 0 else cenario.get('custo_instalacao', 0.0)
 
                     st.markdown(f"#### {cenario['nome']}")
@@ -1342,8 +1346,6 @@ if is_diagram_mode:
                     poupanca_anual_ajustada = custo_evitado_ajustado + receita_adicional_ajustada
                     payback_anos_ajustado = custo_instalacao_cenario / poupanca_anual_ajustada if poupanca_anual_ajustada > 0 else float('inf')
 
-                    # ### INÍCIO DO NOVO CÓDIGO A ADICIONAR ###
-
                     # Chamar a nova função de análise detalhada
                     analise_longo_prazo = calc.calcular_analise_longo_prazo(
                         custo_instalacao=custo_instalacao_cenario,
@@ -1356,8 +1358,6 @@ if is_diagram_mode:
                     )
                     # Guardar os resultados para usar no gráfico mais tarde
                     cenario['analise_longo_prazo'] = analise_longo_prazo
-
-                    # ### FIM DO NOVO CÓDIGO A ADICIONAR ###
 
                     poupanca_anual_base_cenario = (custo_evitado_anual + receita_adicional_anual) if i == 0 else cenario.get('poupanca_anual_base', 0.0)
 
@@ -1386,7 +1386,7 @@ if is_diagram_mode:
                         "y": payback_anos_ajustado if payback_anos_ajustado != float('inf') else 0
                     })
 
-            # ### INÍCIO DO NOVO GRÁFICO DE FLUXO DE CAIXA ###
+            # ### INÍCIO DO GRÁFICO DE FLUXO DE CAIXA ###
 
             # O gráfico será mostrado para a "Simulação Atual"
             simulacao_atual_com_analise = todos_os_cenarios[0]
@@ -1427,7 +1427,7 @@ if is_diagram_mode:
                 html_grafico_projecao = gfx.gerar_grafico_fluxo_caixa('grafico_fluxo_caixa', dados_grafico_projecao)
                 st.components.v1.html(html_grafico_projecao, height=420)
 
-            # ### FIM DO NOVO GRÁFICO DE FLUXO DE CAIXA ###
+            # ### FIM DO GRÁFICO DE FLUXO DE CAIXA ###
 
 
         else:
@@ -1464,8 +1464,6 @@ if is_diagram_mode:
                     st.caption(f"Receita Venda: {formatar_numero_pt(financeiro_atual['receita_venda'], sufixo=' €')}")
                     st.caption(f"**↳ Preço Médio Venda: {formatar_numero_pt(financeiro_atual['preco_medio_venda'], casas_decimais=4, sufixo=' €/kWh**')}")
 
-
-
         # --- GRÁFICO DE CUSTOS MENSAIS (MULTI-CENÁRIO) ---
         if simulacao_ativa_financeiro and 'df_simulado_final' in st.session_state and st.session_state.df_simulado_final is not None:
 
@@ -1497,7 +1495,7 @@ if is_diagram_mode:
                 html_grafico_custos = gfx.gerar_grafico_comparacao_custos('grafico_custos_mensais', dados_grafico_custos)
                 st.components.v1.html(html_grafico_custos, height=420)
 
-            # --- NOVO GRÁFICO DE COMPARAÇÃO DE PAYBACK ---
+            # --- GRÁFICO DE COMPARAÇÃO DE PAYBACK ---
             # Só mostra o gráfico se houver mais do que um cenário para comparar
             if len(dados_para_grafico_payback) > 1:
                 st.markdown("---")
@@ -1512,7 +1510,7 @@ if is_diagram_mode:
                 html_grafico_payback = gfx.gerar_grafico_payback('grafico_payback_cenarios', dados_grafico)
                 st.components.v1.html(html_grafico_payback, height=350)
 
-            # --- INÍCIO DO NOVO BLOCO DE RECOLHA DE DADOS E BOTÃO PDF ---
+            # --- INÍCIO DO BLOCO DE RECOLHA DE DADOS E BOTÃO PDF ---
             st.markdown("---")
 
             # 1. Preparar a lista completa de cenários financeiros
@@ -1575,7 +1573,7 @@ if is_diagram_mode:
                 # Dados para as novas tabelas estáticas
                 'dados_tabela_consumos': {
                     'inicial': consumos_agregados_inicial,
-                    'simulado': consumos_agregados_simulado # Usar o da simulação atual
+                    'simulado': consumos_agregados_simulado
                 },
                 'dados_custos_mensais': dados_grafico_custos,
                 'dados_ranking_payback': dados_para_grafico_payback
@@ -1583,7 +1581,7 @@ if is_diagram_mode:
 
             # 3. Gerar o PDF e o botão de download
             pdf_bytes = gfx.gerar_relatorio_pdf(dados_para_relatorio)
-            # --- FIM DO NOVO BLOCO ---
+            # --- FIM DO BLOCO ---
 
             # --- BOTÕES DE DOWNLOAD (Relatório Detalhado e Análise Venda Excedente) ---
             col_exp_relatorio, col_exp_excedente = st.columns(2)
@@ -1620,7 +1618,7 @@ if is_diagram_mode:
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     use_container_width=True
                 )
-            # --- FIM DO NOVO BOTÃO ---
+            # --- FIM DO BOTÃO ---
 
     #🛠️ Assistente de Dimensionamento de Sistema
     simulacao_ativa = st.session_state.get('chk_simular_paineis', False) or st.session_state.get('chk_simular_bateria', False)
@@ -1694,7 +1692,6 @@ if is_diagram_mode:
                         df_para_bateria.rename(columns={'Injecao_Rede_Final_kWh': 'Excedente_kWh', 'Consumo_Rede_Final_kWh': 'Consumo_Rede_kWh'}, inplace=True)
 
                         if b_kwh > 0:
-                            # A função simular_bateria agora modifica df_para_bateria diretamente
                             df_com_bateria = calc.simular_bateria(
                                 df_com_solar=df_para_bateria,
                                 capacidade_kwh=b_kwh, potencia_kw=b_kwh/2,
@@ -1706,9 +1703,9 @@ if is_diagram_mode:
                             # Se não há bateria, apenas renomeamos as colunas do cenário solar
                             df_final_cenario = df_para_bateria.rename(columns={'Consumo_Rede_kWh': 'Consumo_Rede_Final_kWh', 'Excedente_kWh': 'Injecao_Rede_Final_kWh'})
 
-                        # --- INÍCIO DO BLOCO DE CÁLCULO FINANCEIRO CORRIGIDO ---
+                        # --- INÍCIO DO BLOCO DE CÁLCULO FINANCEIRO ---
                         financeiro_cenario = calc.calcular_valor_financeiro_cenario(
-                            df_cenario=df_final_cenario, # CORREÇÃO 1: Usa a variável correta
+                            df_cenario=df_final_cenario,
                             df_omie_completo=OMIE_CICLOS,
                             precos_compra_kwh_siva=precos_energia_siva,
                             dias_calculo=dias,
@@ -1720,7 +1717,7 @@ if is_diagram_mode:
                             valor_comissao=valor_comissao
                         )
 
-                        # CORREÇÃO 2: Calcula as poupanças anuais base para o payback
+                        # Calcula as poupanças anuais base para o payback
                         financeiro_atual = st.session_state.financeiro_atual
                         custo_evitado_periodo = financeiro_atual['custo_compra_c_iva'] - financeiro_cenario['custo_compra_c_iva']
                         receita_adicional_periodo = financeiro_cenario['receita_venda'] - financeiro_atual['receita_venda']
@@ -1730,7 +1727,7 @@ if is_diagram_mode:
 
                         custo_estimado = p_kwp * custo_por_kwp + b_kwh * custo_por_kwh
 
-                        # CORREÇÃO 3: Chama o payback com as variáveis corretas
+                        # Chama o payback com as variáveis corretas
                         analise_lp = calc.calcular_analise_longo_prazo(
                             custo_instalacao=custo_estimado, # Usa o custo estimado para este cenário
                             poupanca_autoconsumo_anual_base=custo_evitado_anual,
@@ -1757,7 +1754,7 @@ if is_diagram_mode:
                     df_resultados_styled = df_resultados.style.highlight_min(
                         subset=['Payback (anos)'], color='lightgreen'
                     ).format(
-                        # CORREÇÃO: Usar a função formatar_numero_pt para cada coluna
+                        # Usar a função formatar_numero_pt para cada coluna
                         formatter={
                             "Custo Estimado (€)": lambda x: formatar_numero_pt(x, casas_decimais=0, sufixo=" €"),
                             "Poupança Anual (€)": lambda x: formatar_numero_pt(x, casas_decimais=0, sufixo=" €"),
@@ -1883,7 +1880,7 @@ if is_diagram_mode:
                         resultados_finais.append({
                             "Proposta": prop['nome'], "Painéis (kWp)": prop['kwp'], "Bateria (kWh)": prop['kwh_bat'],
                             "Custo Total (€)": prop['custo'], "Poupança Anual (€)": custo_evitado_anual + receita_adicional_anual,
-                            # --- NOVO: Adicionar ROI aos resultados ---
+                            # --- Adicionar ROI aos resultados ---
                             "ROI Anual (%)": analise_lp['roi_simples_anual'],
                             "Payback (anos)": analise_lp['payback_detalhado'],
                             "Poupança a 25 anos (€)": analise_lp['poupanca_total_periodo'] if st.session_state.num_anos_analise == 25 else "N/A"

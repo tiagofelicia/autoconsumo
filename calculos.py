@@ -154,7 +154,6 @@ def interpolar_perfis_para_quarto_horario(perfis_horarios):
                 p45 = ((taxa_inicio_hora * 0.25 + taxa_fim_hora * 0.75) + taxa_fim_hora) / 2.0 * 0.25
                 
                 # A soma de p00, p15, p30, p45 será muito próxima do valor_atual original.
-                # Corrigimos para garantir que a energia é exatamente conservada.
                 soma_calculada = p00 + p15 + p30 + p45
                 if soma_calculada > 0:
                     fator_correcao = valor_atual / soma_calculada
@@ -524,10 +523,9 @@ def obter_perfil_producao_horaria_pvgis(latitude, longitude, inclinacao, orienta
         
         timestamp = pd.to_datetime(df_hourly_raw['time'], format='%Y%m%d:%H%M')
         
-        # --- ALTERAÇÃO PRINCIPAL AQUI ---
         # 1. Extrair mês, DIA e hora
         df_hourly_raw['mes'] = timestamp.dt.month
-        df_hourly_raw['dia'] = timestamp.dt.day # Nova coluna
+        df_hourly_raw['dia'] = timestamp.dt.day
         df_hourly_raw['hora'] = timestamp.dt.hour
         
         # 2. Agrupar por mês, DIA e hora para criar o perfil diário
@@ -542,13 +540,13 @@ def obter_perfil_producao_horaria_pvgis(latitude, longitude, inclinacao, orienta
 
 def simular_autoconsumo_completo(df_consumos, potencia_kwp, latitude, longitude, inclinacao, orientacao_graus, system_loss, posicao_montagem, distrito_backup, fator_sombra):
     """
-    Versão final que remove toda a correção de fuso horário, fazendo uma
+    Versão sem correção de fuso horário, fazendo uma
     correspondência direta entre a hora local do consumo e a hora UTC da API.
     """
     if df_consumos is None or df_consumos.empty:
         return df_consumos.copy(), "Dados de consumo vazios.", None
     """
-    Função atualizada para usar o novo perfil de produção com granularidade diária.
+    Função para usar o novo perfil de produção com granularidade diária.
     """
     perfil_horario_kwh, erro_api = obter_perfil_producao_horaria_pvgis(
         latitude, longitude, inclinacao, orientacao_graus, system_loss, posicao_montagem, distrito_backup
@@ -676,14 +674,14 @@ def calcular_analise_longo_prazo(
     else:
         payback_imediato = False
 
-    # --- NOVO: Cálculo do ROI Simples Anual ---
+    # --- Cálculo do ROI Simples Anual ---
     poupanca_anual_total_base = poupanca_autoconsumo_anual_base + poupanca_venda_anual_base
     if custo_instalacao > 0 and poupanca_anual_total_base > 0:
         roi_simples_anual = (poupanca_anual_total_base / custo_instalacao) * 100
     else:
         # Se não há custo ou não há poupança, o ROI é 0 ou indefinido. Retornamos 0.
         roi_simples_anual = 0.0
-    # --- FIM DO NOVO CÓDIGO ---
+    # --- FIM DO CÓDIGO ---
 
     taxa_degradacao = taxa_degradacao_perc / 100.0
     taxa_inflacao = taxa_inflacao_energia_perc / 100.0
@@ -720,12 +718,12 @@ def calcular_analise_longo_prazo(
     if payback_anos_detalhado == float('inf') and anos_analise > 0:
          payback_anos_detalhado = float('inf')
 
-    # --- NOVO: Adicionar o ROI ao dicionário de retorno ---
+    # --- Adicionar o ROI ao dicionário de retorno ---
     return {
         "payback_detalhado": payback_anos_detalhado,
         "poupanca_total_periodo": poupanca_acumulada,
         "fluxo_caixa_anual": fluxo_caixa_anual,
         "fluxo_caixa_acumulado": fluxo_caixa_acumulado_lista,
         "anos_analise": anos_analise,
-        "roi_simples_anual": roi_simples_anual # <-- NOVA CHAVE
+        "roi_simples_anual": roi_simples_anual
     }

@@ -663,10 +663,10 @@ def criar_tabela_analise_completa_html(consumos_agregados, omie_agregados):
     que se adaptam ao tema claro/escuro do Streamlit.
     """
     
-    # --- NOVO: Deteção do Tema Atual do Streamlit ---
+    # --- Deteção do Tema Atual do Streamlit ---
     is_dark_theme = st.get_option('theme.base') == 'dark'
 
-    # --- NOVO: Definição de DUAS paletas de cores ---
+    # --- Definição de DUAS paletas de cores ---
     
     # Paleta para o Tema Claro (a sua original)
     cores_light = {
@@ -683,7 +683,7 @@ def criar_tabela_analise_completa_html(consumos_agregados, omie_agregados):
         }
     }
     
-    # Paleta para o Tema Escuro (novas cores com melhor contraste)
+    # Paleta para o Tema Escuro ( cores com melhor contraste)
     cores_dark = {
         'header': {
             'S':  {'bg': '#5A5A5A'}, 'BD': {'bg': '#4B6140'}, 'BS': {'bg': '#3E4C6D'},
@@ -698,7 +698,7 @@ def criar_tabela_analise_completa_html(consumos_agregados, omie_agregados):
         }
     }
 
-    # --- NOVO: Selecionar a paleta e cores de base com base no tema ---
+    # --- Selecionar a paleta e cores de base com base no tema ---
     if is_dark_theme:
         cores = cores_dark
         row_label_bg = '#1E2128'   # Fundo escuro para os rótulos
@@ -802,10 +802,10 @@ def criar_tabela_comparativa_html(consumos_agregados_inicial, consumos_agregados
     ao tema claro/escuro do Streamlit.
     """
     
-    # --- NOVO: Deteção do Tema Atual do Streamlit ---
+    # --- Deteção do Tema Atual do Streamlit ---
     is_dark_theme = st.get_option('theme.base') == 'dark'
 
-    # --- NOVO: Definição de DUAS paletas de cores ---
+    # --- Definição de DUAS paletas de cores ---
 
     # Paleta para o Tema Claro (a sua original)
     cores_light = {
@@ -847,7 +847,7 @@ def criar_tabela_comparativa_html(consumos_agregados_inicial, consumos_agregados
         }
     }
 
-    # --- NOVO: Selecionar a paleta e cores de base com base no tema ---
+    # --- Selecionar a paleta e cores de base com base no tema ---
     if is_dark_theme:
         cores = cores_dark
         row_label_bg = '#1E2128'
@@ -920,7 +920,7 @@ def criar_tabela_comparativa_html(consumos_agregados_inicial, consumos_agregados
 
     def formatar_diff_rel(valor):
         if valor == float('inf'): return "<span class='diff-pos'>+inf</span>"
-        return formatar_diff(valor, 1) # Chama a nova função base
+        return formatar_diff(valor, 1)
 
     html += "<table class='comp-table'>"
     html += "<thead><tr><th rowspan='2'>Métrica</th>"
@@ -1172,7 +1172,7 @@ def gerar_mapa_solar(chart_id, chart_data):
     com subtítulo, unidade de tooltip dinâmica e funcionalidade de exportação.
     """
     titulo = chart_data['titulo']
-    subtitulo = chart_data.get('subtitulo', '') # Obter o novo subtítulo
+    subtitulo = chart_data.get('subtitulo', '')
     map_data_json = json.dumps(chart_data['dados_mapa'])
     map_url = chart_data['map_url']
     unidade = chart_data['unidade']
@@ -1369,7 +1369,7 @@ def gerar_relatorio_pdf(dados_relatorio):
     pdf.set_font('NotoSans', 'B', 12)
     pdf.cell(0, 10, '2. Resumo Energético (Anualizado)', 0, 1, 'L')
     
-    # Cabeçalho da tabela com cores corrigidas
+    # Cabeçalho da tabela
     pdf.set_fill_color(220, 220, 220) # Cinzento claro
     pdf.set_text_color(0, 0, 0)       # Texto preto
     pdf.set_font('NotoSans', 'B', 9)
@@ -1421,7 +1421,7 @@ def gerar_relatorio_pdf(dados_relatorio):
         pdf.set_font('NotoSans', 'B', 12)
         pdf.cell(0, 10, '4. Análise Comparativa de Consumos (Inicial vs. Simulado)', 0, 1, 'L')
         pdf.set_font('NotoSans', 'B', 9)
-        # Cabeçalhos com cores corrigidas
+        # Cabeçalhos
         pdf.set_fill_color(220, 220, 220)
         pdf.set_text_color(0, 0, 0)
         pdf.cell(40, 7, 'Período', 1, 0, 'C', 1)

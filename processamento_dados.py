@@ -39,7 +39,7 @@ def processar_ficheiro_consumos(ficheiro_excel):
     extrai os dados relevantes de consumo e injeção, e retorna um DataFrame padronizado.
     """
     try:
-        # 1. Encontrar a linha do cabeçalho (lógica mantida)
+        # 1. Encontrar a linha do cabeçalho
         df_temp = pd.read_excel(ficheiro_excel, header=None, nrows=20)
         header_row_index = -1
         for i, row in df_temp.iterrows():
@@ -89,7 +89,7 @@ def processar_ficheiro_consumos(ficheiro_excel):
             if col not in df_final.columns:
                 df_final[col] = 0.0
 
-        # 4. Processamento de Data e Hora (lógica mantida)
+        # 4. Processamento de Data e Hora
         df_final['DataHora'] = pd.to_datetime(
             df['Data'].astype(str) + ' ' + df['Hora'].astype(str),
             errors='coerce'
