@@ -20,7 +20,7 @@ from openpyxl.styles import Font, Alignment, Border, Side, PatternFill # Para fo
 from openpyxl.utils import get_column_letter # Para nomes de colunas Excel
 from calendar import monthrange
 
-st.set_page_config(page_title="Simulador de Autoconsumo Solar - Portugal", layout="wide",initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Simulador de Autoconsumo Solar Fotovoltaico - Portugal | Tiago Felícia", page_icon="☀️", layout="wide",initial_sidebar_state="collapsed")
 
 # --- Carregar ficheiro Excel do GitHub ---
 url_excel = "https://github.com/tiagofelicia/autoconsumo/raw/refs/heads/main/TiagoFelicia_Simulador_Autoconsumo.xlsx"
@@ -737,14 +737,14 @@ if is_diagram_mode:
     # ### SECÇÃO 2: SIMULAÇÃO E COMPARAÇÃO                           ###
     # ##################################################################
     st.markdown("---")
-    st.subheader("☀️ Simulação de Novo Cenário e Comparação")
+    st.subheader("✨ Simulação de Novo Cenário e Comparação")
 
 
     # --- PONTO 1: CONFIGURAÇÃO DAS SIMULAÇÕES COM CALLBACKS ---
-    simular_paineis_check = st.checkbox("🌱Simular (novo/ampliação) sistema solar", key="chk_simular_paineis", on_change=reset_solar_callback)
+    simular_paineis_check = st.checkbox("☀️ Simular (novo/ampliação) sistema solar", key="chk_simular_paineis", on_change=reset_solar_callback)
     
     pode_simular_bateria = tem_upac_existente or simular_paineis_check
-    simular_bateria_check = st.checkbox("🔋Simular bateria de armazenamento", key="chk_simular_bateria", on_change=calcular_simulacao_callback, disabled=not pode_simular_bateria)
+    simular_bateria_check = st.checkbox("🔋 Simular bateria de armazenamento", key="chk_simular_bateria", on_change=calcular_simulacao_callback, disabled=not pode_simular_bateria)
     
     simulacao_ativa = simular_paineis_check or simular_bateria_check
 
