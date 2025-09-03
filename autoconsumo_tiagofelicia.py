@@ -409,6 +409,88 @@ with st.expander("❓ Como Usar o Simulador (Guia Rápido)", expanded=False):
 # ##################################################################
 
 # ##################################################################
+# INÍCIO DO BLOCO - FAQ (Perguntas Frequentes)
+# ##################################################################
+
+with st.expander("❔ Perguntas Frequentes sobre Autoconsumo", expanded=False):
+    
+    st.markdown("#### O que é o autoconsumo?")
+    st.write("""
+    É como ter uma pequena horta em casa, mas em vez de vegetais, "cultiva" eletricidade! 
+    Tecnicamente, é a energia produzida pelos seus painéis solares que é consumida instantaneamente 
+    na sua casa ou empresa para alimentar os seus equipamentos (frigorífico, televisão, etc.).
+
+    É a forma mais rentável de aproveitar a energia solar, porque **cada kWh que autoconsome é um kWh que não precisa de comprar à rede elétrica**, gerando uma poupança direta na sua fatura.
+    """)
+
+    st.markdown("#### Qual a diferença entre autoconsumo e injeção de excedente?")
+    st.write("""
+    Imagine que os seus painéis são uma torneira e o consumo da sua casa é um copo que está a encher.
+    
+    * **Autoconsumo:** É a água (energia) da torneira que cai diretamente para dentro do copo e que você bebe de imediato.
+    * **Injeção de Excedente:** Quando o copo fica cheio, a água que continua a sair da torneira transborda. Essa energia "extra", que não foi consumida na hora, é o **excedente**, que é injetado na rede elétrica pública para ser consumido por outros.
+    
+    A diferença financeira é crucial: a energia que autoconsome vale o preço total de compra à rede (ex: 0,16 €/kWh), enquanto a energia excedente que vende tem um valor mais baixo (ex: 0,05 €/kWh).
+    """)
+
+    st.markdown("#### O que é uma UPAC?")
+    st.write("""
+    UPAC significa **Unidade de Produção para Autoconsumo**. É simplesmente o nome técnico e oficial dado em Portugal ao seu sistema de painéis solares destinado a produzir energia para consumo próprio. Quando ouve falar em "legalizar uma UPAC", refere-se ao registo obrigatório do seu sistema solar junto das autoridades competentes.
+    """)
+    
+    st.markdown("#### Preciso de uma bateria de armazenamento?")
+    st.write("""
+    Não é obrigatório, mas pode ser muito vantajoso. Uma bateria funciona como um "reservatório" de energia.
+    
+    * **Função:** Guarda o excedente de energia produzido durante o dia (quando há muito sol) para que a possa usar à noite ou em dias nublados, quando os painéis não produzem ou produzem pouco.
+    * **Vantagem:** Aumenta drasticamente a sua taxa de autoconsumo, reduzindo ainda mais a dependência da rede elétrica.
+    * **Desvantagem:** Representa um investimento inicial mais elevado.
+    
+    A melhor forma de saber se compensa no seu caso é usar este simulador! Crie um cenário com bateria e outro sem, e compare a poupança gerada e o tempo de retorno do investimento (Payback).
+    """)
+
+    st.markdown("#### A orientação e a inclinação dos painéis são muito importantes?")
+    st.write("""
+    Sim, são cruciais para maximizar a produção de energia!
+    
+    * **Orientação Ideal em Portugal:** Virada a **Sul** (correspondente a 0º no simulador). Isto garante a máxima exposição solar ao longo do dia. Orientações para Sudeste ou Sudoeste também são muito eficientes.
+    * **Inclinação Ideal em Portugal:** Cerca de **30 a 35 graus**. Esta inclinação otimiza a captação solar ao longo de todo o ano.
+    
+    Pequenos desvios não inviabilizam o sistema, mas otimizar estes parâmetros garante que tira o máximo partido do seu investimento. Use o simulador para testar diferentes configurações e ver o impacto na produção.
+    """)
+    
+    st.markdown("#### O que significa a potência em kWp?")
+    st.write("""
+    kWp significa **kilowatt-pico** (*kilowatt-peak*). É a unidade de medida da potência máxima que um painel ou um conjunto de painéis solares consegue produzir em condições ideais de laboratório (sol intenso de 1000 W/m² e temperatura de 25°C).
+
+    Na prática, serve como uma **medida de referência** para comparar o "tamanho" e a capacidade de diferentes sistemas solares. Um sistema de 4 kWp tem, em teoria, o dobro da capacidade de produção instantânea de um sistema de 2 kWp.
+    """)
+
+    st.markdown("#### Como funciona a venda de excedente ao preço do OMIE?")
+    st.write("""
+    **OMIE** é o nome do mercado grossista de eletricidade na Península Ibérica, onde o preço da energia é definido a cada hora.
+    
+    Vender o seu excedente em regime "indexado ao OMIE" significa que o preço que recebe pela energia que injeta na rede não é fixo. Ele **varia de hora a hora**, de acordo com a oferta e a procura no mercado. As empresas que compram o seu excedente normalmente aplicam uma comissão sobre este valor.
+    """)
+    
+    st.markdown("""
+    #### Qual a diferença entre o autoconsumo do inversor e o "settlement" da E-Redes?
+    """)
+    st.write("""
+    Esta é uma excelente pergunta e um detalhe técnico importante para a precisão dos cálculos!
+
+    * **Autoconsumo do Inversor (Instantâneo):** É a energia que é produzida pelos painéis e consumida pela sua casa *no mesmo instante*. Esta energia usada dentro da instalação **nunca chega a passar pelo contador inteligente da E-Redes**. A única forma de a medir é através da aplicação do seu inversor solar.
+
+    * **Autoconsumo por "Settlement" (Acerto de Contas):** O contador da E-Redes faz leituras em blocos de 15 minutos. Dentro desse bloco, pode haver momentos em que injeta energia na rede e outros em que consome. A E-Redes faz um "acerto": se dentro de 15 minutos injetou 0.5 kWh e consumiu 0.7 kWh, a E-Redes regista apenas um consumo líquido de 0.2 kWh. Aquele 0.5 kWh que foi "abatido" é o autoconsumo por settlement.
+
+    Para ter o valor total e real do seu autoconsumo (e da sua poupança), **é fundamental somar estes dois valores**. É por isso que o simulador lhe pede o "Autoconsumo do Inversor" quando deteta que o seu ficheiro já tem dados de uma UPAC.
+    """)
+
+# ##################################################################
+# FIM DO BLOCO - FAQ (Perguntas Frequentes)
+# ##################################################################
+
+# ##################################################################
 # ###              SECÇÃO MAPA SOLAR DE PORTUGAL                 ###
 # ##################################################################
 st.subheader("🗺️ Mapa Solar Interativo de Portugal")
