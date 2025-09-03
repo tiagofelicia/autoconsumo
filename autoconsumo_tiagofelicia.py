@@ -486,6 +486,42 @@ with st.expander("❔ Perguntas Frequentes sobre Autoconsumo", expanded=False):
     Para ter o valor total e real do seu autoconsumo (e da sua poupança), **é fundamental somar estes dois valores**. É por isso que o simulador lhe pede o "Autoconsumo do Inversor" quando deteta que o seu ficheiro já tem dados de uma UPAC.
     """)
 
+    st.markdown("#### O que é o 'Payback' ou Retorno do Investimento?")
+    st.write("""
+    'Payback' é o termo em inglês para o tempo que demora a recuperar o seu investimento inicial através da poupança que gera. Por exemplo, se um sistema custou 3.000 € e lhe gera uma poupança de 600 € por ano, o payback simples é de 5 anos (3.000 € / 600 €/ano).
+
+    Este simulador vai mais além e calcula o **Payback Detalhado**, que é mais realista porque tem em conta fatores como:
+    - A **inflação** anual no preço da energia (a sua poupança tende a aumentar cada ano).
+    - A ligeira **degradação** da eficiência dos painéis ao longo do tempo (a sua produção tende a diminuir ligeiramente a cada ano).
+    """)
+
+    st.markdown("#### Os painéis solares perdem eficiência com o tempo?")
+    st.write("""
+    Sim, como qualquer tecnologia, os painéis solares têm uma ligeira perda de eficiência ao longo dos anos. Este processo chama-se **degradação**.
+
+    No entanto, é um processo muito lento e previsível. A maioria dos fabricantes de qualidade garante que, ao fim de 25 anos, os seus painéis ainda terão entre 80% a 87% da sua capacidade de produção original. A taxa de degradação anual típica é de cerca de **0.5%**.
+
+    No nosso simulador, na secção de análise financeira, pode ajustar o slider de **"Degradação anual dos painéis (%)"** para ver como isto afeta a sua poupança a longo prazo.
+    """)
+
+    st.markdown("#### Se faltar a luz da rede, o meu sistema solar continua a funcionar?")
+    st.write("""
+    Esta é uma das dúvidas mais comuns! A resposta para a maioria dos sistemas é **não**.
+
+    Por razões de segurança, os sistemas de autoconsumo ligados à rede (chamados *grid-tied*) têm uma funcionalidade obrigatória chamada **"anti-ilhamento"**. Se a rede pública falhar, o seu inversor desliga-se automaticamente para garantir que não está a injetar eletricidade numa rede que os técnicos podem estar a tentar reparar.
+
+    Para ter eletricidade durante um apagão, precisaria de um sistema com **baterias e um inversor híbrido** que tenha a funcionalidade de *backup* ou *off-grid*.
+    """)
+
+    st.markdown("#### Porque é que o simulador precisa do meu 'Diagrama de Carga' e não apenas da minha fatura mensal?")
+    st.write("""
+    A sua fatura mensal diz-nos **O QUÊ** consumiu (o total de kWh), mas o Diagrama de Carga diz-nos **QUANDO** consumiu, a cada 15 minutos. E para o autoconsumo, o "quando" é tudo.
+
+    Saber que gastou 300 kWh num mês é útil, mas saber que a maioria desses kWh foram gastos à noite (quando não há sol) ou durante picos de consumo ao fim de semana é **crucial** para uma simulação precisa.
+
+    O Diagrama de Carga permite ao simulador cruzar, a cada 15 minutos, o seu consumo real com a produção solar estimada para esse mesmo instante. Só assim conseguimos calcular com precisão o valor mais importante de todos: o **autoconsumo instantâneo**, que gera a maior poupança.
+    """)
+
 # ##################################################################
 # FIM DO BLOCO - FAQ (Perguntas Frequentes)
 # ##################################################################
