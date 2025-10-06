@@ -178,7 +178,9 @@ def calcular_valor_financeiro_cenario(
     # --- Para venda ---
     modelo_venda,
     tipo_comissao,
-    valor_comissao
+    valor_comissao,
+    venda_excedente_ativa=True
+
 ):
     """
     Calcula o valor financeiro de um cenário de autoconsumo, com cálculo detalhado
@@ -235,7 +237,7 @@ def calcular_valor_financeiro_cenario(
     receita_venda = 0
     preco_medio_venda = 0
 
-    if injecao_rede_total > 0:
+    if venda_excedente_ativa and injecao_rede_total > 0:
         if modelo_venda == 'Preço Fixo':
             receita_venda = injecao_rede_total * valor_comissao
             preco_medio_venda = valor_comissao

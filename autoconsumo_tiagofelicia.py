@@ -23,7 +23,7 @@ from calendar import monthrange
 st.set_page_config(page_title="Simulador de Autoconsumo Solar Fotovoltaico - Portugal | Tiago Felícia", page_icon="☀️", layout="wide",initial_sidebar_state="collapsed")
 
 # --- Carregar ficheiro Excel do GitHub ---
-url_excel = "https://github.com/tiagofelicia/autoconsumo/raw/refs/heads/main/TiagoFelicia_Simulador_Autoconsumo.xlsx"
+url_excel = "https://github.com/tiagofelicia/autoconsumo/raw/refs/heads/main/Simulador_%E2%98%80%EF%B8%8F_Autoconsumo_Tiago_Felicia.xlsx"
 OMIE_CICLOS, CONSTANTES = proc_dados.carregar_dados_excel(url_excel)
 
 
@@ -1232,7 +1232,7 @@ if is_diagram_mode:
         st.subheader("💰 Análise Financeira e Poupança")
 
         # --- Bloco Único para Inputs Financeiros ---
-        st.markdown("##### Preços do seu Tarifário de Eletricidade (para cálculo da compra à rede)")
+        st.markdown("##### Preços do seu Tarifário de Eletricidade")
         
         precos_energia_siva = exibir_inputs_precos_energia(st.session_state.sel_opcao_horaria)
 
@@ -1243,19 +1243,30 @@ if is_diagram_mode:
             is_familia_numerosa = st.checkbox("Sou beneficiário de Família Numerosa", key="chk_familia_numerosa")
 
         st.markdown("##### Venda do Excedente")
-        col_fin1, col_fin2 = st.columns(2)
-        with col_fin1:
-            modelo_venda = st.selectbox("Modelo de Venda", ["Preço Fixo", "Indexado ao OMIE"], key="modelo_venda")
-        with col_fin2:
-            if modelo_venda == "Preço Fixo":
-                tipo_comissao = None
-                valor_comissao = st.number_input("Preço de Venda Fixo (€/kWh)", value=0.05, step=0.01, format="%.4f", key="valor_venda_fixo")
-            else:
-                tipo_comissao = st.radio("Tipo de Comissão sobre OMIE", ["Percentual (%)", "Fixo (€/MWh)"], horizontal=True, key="tipo_comissao")
-                if tipo_comissao == "Percentual (%)":
-                    valor_comissao = st.slider("Comissão (%)", 0, 100, 20, key="valor_comissao_perc")
+        venda_excedente_ativa_ui = st.checkbox(
+            "Considerar Venda de Excedente", 
+            key="chk_venda_excedente", 
+            value=True, # Ligado por defeito
+        )
+        if venda_excedente_ativa_ui:
+            col_fin1, col_fin2 = st.columns(2)
+            with col_fin1:
+                modelo_venda = st.selectbox("Modelo de Venda", ["Preço Fixo", "Indexado ao OMIE"], key="modelo_venda")
+            with col_fin2:
+                if modelo_venda == "Preço Fixo":
+                    tipo_comissao = None
+                    valor_comissao = st.number_input("Preço de Venda Fixo (€/kWh)", value=0.05, step=0.01, format="%.4f", key="valor_venda_fixo")
                 else:
-                    valor_comissao = st.number_input("Comissão Fixa (€/MWh)", value=10.0, step=0.5, format="%.2f", key="valor_comissao_fixo")
+                    tipo_comissao = st.radio("Tipo de Comissão sobre OMIE", ["Percentual (%)", "Fixo (€/MWh)"], horizontal=True, key="tipo_comissao")
+                    if tipo_comissao == "Percentual (%)":
+                        valor_comissao = st.slider("Comissão (%)", 0, 100, 20, key="valor_comissao_perc")
+                    else:
+                        valor_comissao = st.number_input("Comissão Fixa (€/MWh)", value=10.0, step=0.5, format="%.2f", key="valor_comissao_fixo")
+        else:
+            # Se a venda estiver inativa, definimos os valores para não terem efeito
+            modelo_venda = "Preço Fixo"
+            tipo_comissao = None
+            valor_comissao = 0
 
         # --- Bloco de Cálculos Financeiros ---
         with st.spinner("A calcular resultados financeiros..."):
@@ -1276,7 +1287,8 @@ if is_diagram_mode:
                 familia_numerosa_bool=is_familia_numerosa,
                 modelo_venda=modelo_venda,
                 tipo_comissao=tipo_comissao,
-                valor_comissao=valor_comissao
+                valor_comissao=valor_comissao,
+                venda_excedente_ativa=venda_excedente_ativa_ui
             )
             st.session_state.financeiro_atual = financeiro_atual
 
@@ -1297,7 +1309,8 @@ if is_diagram_mode:
                     familia_numerosa_bool=is_familia_numerosa,
                     modelo_venda=modelo_venda,
                     tipo_comissao=tipo_comissao,
-                    valor_comissao=valor_comissao
+                    valor_comissao=valor_comissao,
+                    venda_excedente_ativa=venda_excedente_ativa_ui
                 )
                 st.session_state.financeiro_simulado = financeiro_simulado
 
@@ -1680,7 +1693,9 @@ if is_diagram_mode:
                     'sombra': st.session_state.solar_sombra,
                     'bateria_kwh': st.session_state.bat_capacidade if st.session_state.chk_simular_bateria else 0,
                     'bateria_kw': st.session_state.bat_potencia if st.session_state.chk_simular_bateria else 0,
-                    'opcao_horaria': st.session_state.sel_opcao_horaria
+                    'opcao_horaria': st.session_state.sel_opcao_horaria,
+                    'simulou_paineis': st.session_state.get('chk_simular_paineis', False),
+                    'simulou_bateria': st.session_state.get('chk_simular_bateria', False)
                 },
                 'cenario_atual_energia': {
                     'consumo_rede': analise_real['consumo_rede'] * (365.25 / dias),
@@ -1738,223 +1753,60 @@ if is_diagram_mode:
                 )
             # --- FIM DO BOTÃO ---
 
-    #🛠️ Assistente de Dimensionamento de Sistema
-    simulacao_ativa = st.session_state.get('chk_simular_paineis', False) or st.session_state.get('chk_simular_bateria', False)
+        #🛠️ Assistente de Dimensionamento de Sistema
+        simulacao_ativa = st.session_state.get('chk_simular_paineis', False) or st.session_state.get('chk_simular_bateria', False)
 
-    if simulacao_ativa:
+        if simulacao_ativa:
 
-        st.markdown("---")
-        st.subheader("🛠️ Assistente de Dimensionamento de Sistema")
-
-        with st.expander("Calcular e comparar vários cenários de potência e armazenamento", expanded=False):
-            st.info("Selecione várias opções de painéis e baterias para comparar o seu desempenho financeiro lado a lado.")
-
-            st.markdown("##### Custos de Referência para Estimativa")
-            col_custo1, col_custo2 = st.columns(2)
-            with col_custo1:
-                custo_por_kwp = st.number_input("Custo por kWp de painéis (€)", value=750, step=50)
-            with col_custo2:
-                custo_por_kwh = st.number_input("Custo por kWh de bateria (€)", value=300, step=50)
-
-
-            # Opções de potências e baterias para o utilizador escolher
-            opcoes_paineis_kwp = [0.0, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0] # 0.0 representa "Sem novos paineis"
-            opcoes_bateria_kwh = [0.0, 5.0, 7.5, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0] # 0.0 representa "Sem Bateria"
-
-            col_dim1, col_dim2 = st.columns(2)
-            with col_dim1:
-                potencias_a_testar = st.multiselect("Potências de Painéis (kWp) a testar:", opcoes_paineis_kwp, default=[2.0, 3.0, 4.0])
-            with col_dim2:
-                baterias_a_testar = st.multiselect("Capacidades de Bateria (kWh) a testar:", opcoes_bateria_kwh, default=[0.0, 5.0, 10.0])
-
-            # --- LÓGICA DE CONTROLO E LIMITE ---
-            num_combinacoes = len(potencias_a_testar) * len(baterias_a_testar)
-            LIMITE_COMBINACOES = 16 # O nosso limite prático
-
-            if num_combinacoes > 0:
-                st.write(f"Total de combinações a calcular: **{num_combinacoes}**")
-
-            botao_desativado = False
-            if num_combinacoes > LIMITE_COMBINACOES:
-                st.warning(f"Selecionou {num_combinacoes} combinações. Para garantir um tempo de cálculo razoável, por favor selecione um máximo de {LIMITE_COMBINACOES} combinações.")
-                botao_desativado = True
-            elif num_combinacoes == 0:
-                botao_desativado = True
-
-            if st.button("Analisar Dimensionamento", disabled=botao_desativado, use_container_width=True, type="primary"):
-                resultados_dimensionamento = []
-                barra_progresso = st.progress(0.0, text="A iniciar cálculos...")
-
-                total_a_calcular = num_combinacoes
-                calculo_atual = 0
-
-                # Loop principal que itera por todas as combinações
-                for p_kwp in potencias_a_testar:
-                    df_solar, _, _ = calc.simular_autoconsumo_completo(
-                        st.session_state.df_analise_original, p_kwp,
-                        st.session_state.solar_latitude, st.session_state.solar_longitude,
-                        st.session_state.solar_inclinacao, st.session_state.solar_orientacao_graus,
-                        st.session_state.solar_loss,
-                        "free" if st.session_state.solar_montagem == "Instalação livre (free-standing)" else "building",
-                        st.session_state.distrito_selecionado,
-                        st.session_state.solar_sombra
-                    )
-                    df_pre_bateria_cenario = calc.aplicar_simulacao_solar_aos_dados_base(st.session_state.df_analise_original, df_solar)
-
-                    for b_kwh in baterias_a_testar:
-                        calculo_atual += 1
-                        percentagem = calculo_atual / total_a_calcular
-                        barra_progresso.progress(percentagem, text=f"A calcular {calculo_atual}/{total_a_calcular}: Painéis {p_kwp:.1f} kWp, Bateria {b_kwh:.1f} kWh...")
-
-                        df_para_bateria = df_pre_bateria_cenario[['DataHora', 'Injecao_Rede_Final_kWh', 'Consumo_Rede_Final_kWh']].copy()
-                        df_para_bateria.rename(columns={'Injecao_Rede_Final_kWh': 'Excedente_kWh', 'Consumo_Rede_Final_kWh': 'Consumo_Rede_kWh'}, inplace=True)
-
-                        if b_kwh > 0:
-                            df_com_bateria = calc.simular_bateria(
-                                df_com_solar=df_para_bateria,
-                                capacidade_kwh=b_kwh, potencia_kw=b_kwh/2,
-                                eficiencia_perc=st.session_state.bat_eficiencia, dod_perc=st.session_state.bat_dod
-                            )
-                            # Renomeamos as colunas aqui para o padrão esperado pela função financeira
-                            df_final_cenario = df_com_bateria.rename(columns={'Consumo_Rede_kWh': 'Consumo_Rede_Final_kWh', 'Excedente_kWh': 'Injecao_Rede_Final_kWh'})
-                        else:
-                            # Se não há bateria, apenas renomeamos as colunas do cenário solar
-                            df_final_cenario = df_para_bateria.rename(columns={'Consumo_Rede_kWh': 'Consumo_Rede_Final_kWh', 'Excedente_kWh': 'Injecao_Rede_Final_kWh'})
-
-                        # --- INÍCIO DO BLOCO DE CÁLCULO FINANCEIRO ---
-                        financeiro_cenario = calc.calcular_valor_financeiro_cenario(
-                            df_cenario=df_final_cenario,
-                            df_omie_completo=OMIE_CICLOS,
-                            precos_compra_kwh_siva=precos_energia_siva,
-                            dias_calculo=dias,
-                            potencia_kva=st.session_state.sel_potencia,
-                            opcao_horaria_str=st.session_state.sel_opcao_horaria,
-                            familia_numerosa_bool=is_familia_numerosa,
-                            modelo_venda=modelo_venda,
-                            tipo_comissao=tipo_comissao,
-                            valor_comissao=valor_comissao
-                        )
-
-                        # Calcula as poupanças anuais base para o payback
-                        financeiro_atual = st.session_state.financeiro_atual
-                        custo_evitado_periodo = financeiro_atual['custo_compra_c_iva'] - financeiro_cenario['custo_compra_c_iva']
-                        receita_adicional_periodo = financeiro_cenario['receita_venda'] - financeiro_atual['receita_venda']
-                        custo_evitado_anual = (custo_evitado_periodo * (365.25 / dias)) if dias > 0 else 0
-                        receita_adicional_anual = (receita_adicional_periodo * (365.25 / dias)) if dias > 0 else 0
-                        poupanca_anual_total = custo_evitado_anual + receita_adicional_anual
-
-                        custo_estimado = p_kwp * custo_por_kwp + b_kwh * custo_por_kwh
-
-                        # Chama o payback com as variáveis corretas
-                        analise_lp = calc.calcular_analise_longo_prazo(
-                            custo_instalacao=custo_estimado, # Usa o custo estimado para este cenário
-                            poupanca_autoconsumo_anual_base=custo_evitado_anual,
-                            poupanca_venda_anual_base=receita_adicional_anual,
-                            anos_analise=st.session_state.num_anos_analise, # Obtém da UI principal
-                            taxa_degradacao_perc=st.session_state.slider_degradacao,
-                            taxa_inflacao_energia_perc=st.session_state.slider_inflacao_energia,
-                            taxa_variacao_venda_perc=st.session_state.slider_variacao_venda
-                        )
-
-                        resultados_dimensionamento.append({
-                            "Painéis (kWp)": p_kwp,
-                            "Bateria (kWh)": b_kwh,
-                            "Custo Estimado (€)": custo_estimado,
-                            "Poupança Anual (€)": round(poupanca_anual_total),
-                            "Payback (anos)": round(analise_lp['payback_detalhado'], 1) if analise_lp['payback_detalhado'] != float('inf') else '>30'
-                        })
-
-                barra_progresso.empty()
-
-                if resultados_dimensionamento:
-                    df_resultados = pd.DataFrame(resultados_dimensionamento)
-                    st.markdown("### Resultados Comparativos")
-                    df_resultados_styled = df_resultados.style.highlight_min(
-                        subset=['Payback (anos)'], color='lightgreen'
-                    ).format(
-                        # Usar a função formatar_numero_pt para cada coluna
-                        formatter={
-                            "Custo Estimado (€)": lambda x: formatar_numero_pt(x, casas_decimais=0, sufixo=" €"),
-                            "Poupança Anual (€)": lambda x: formatar_numero_pt(x, casas_decimais=0, sufixo=" €"),
-                            "Painéis (kWp)": lambda x: formatar_numero_pt(x, casas_decimais=1),
-                            "Bateria (kWh)": lambda x: formatar_numero_pt(x, casas_decimais=1),
-                            # Lógica especial para o Payback, para não formatar o texto '>30'
-                            "Payback (anos)": lambda x: formatar_numero_pt(x, casas_decimais=1) if isinstance(x, (int, float)) else x
-                        }
-                    )
-                    st.dataframe(df_resultados_styled, use_container_width=True)
-
-    st.markdown("---")
-    st.subheader("⚖️ Comparador de Propostas Comerciais")
-
-    with st.expander("Introduza e compare propostas de diferentes instaladores - irá utilizar a Localização Geográfica do Sistema Solar escolhida em Simular sistema Solar", expanded=False):
-        
-        # Inicializar a lista de propostas no estado da sessão, se não existir
-        if 'propostas_comerciais' not in st.session_state:
-            st.session_state.propostas_comerciais = []
-
-        st.info("Adicione os detalhes das propostas que recebeu. O simulador usará os parâmetros de localização e orientação definidos acima para garantir uma comparação justa.")
-
-        # Usamos um formulário para adicionar propostas, para não recarregar a página a cada input
-        with st.form("form_add_proposta", clear_on_submit=True):
-            st.markdown("##### Adicionar Nova Proposta")
-            col_prop1, col_prop2, col_prop3, col_prop4 = st.columns(4)
-            with col_prop1:
-                nome_proposta = st.text_input("Nome da Proposta", placeholder="Ex: Empresa Solar")
-            with col_prop2:
-                kwp_proposta = st.number_input("Painéis (kWp)", min_value=0.0, step=0.1, format="%.2f")
-            with col_prop3:
-                kwh_bateria_proposta = st.number_input("Bateria (kWh)", min_value=0.0, step=0.1, format="%.1f")
-            with col_prop4:
-                custo_proposta = st.number_input("Custo Total (€)", min_value=0.0, step=100.0, format="%.2f")
-
-            submitted = st.form_submit_button("Adicionar Proposta à Lista")
-            if submitted and nome_proposta:
-                nova_proposta = {
-                    "nome": nome_proposta,
-                    "kwp": kwp_proposta,
-                    "kwh_bat": kwh_bateria_proposta,
-                    "custo": custo_proposta
-                }
-                st.session_state.propostas_comerciais.append(nova_proposta)
-                st.rerun() # Recarrega para mostrar a lista atualizada
-
-        # Exibir a lista de propostas adicionadas
-        if st.session_state.propostas_comerciais:
             st.markdown("---")
-            st.markdown("##### Propostas para Comparar")
-            
-            for i, prop in enumerate(st.session_state.propostas_comerciais):
-                cols_lista = st.columns([3, 2, 2, 2, 1])
-                cols_lista[0].write(f"**{prop['nome']}**")
-                cols_lista[1].write(f"{prop['kwp']} kWp")
-                cols_lista[2].write(f"{prop['kwh_bat']} kWh")
-                cols_lista[3].write(f"{formatar_numero_pt(prop['custo'], sufixo=' €')}")
-                
-                # Botão para remover a proposta
-                if cols_lista[4].button("Remover", key=f"del_{i}"):
-                    st.session_state.propostas_comerciais.pop(i)
-                    st.rerun()
-            
-            st.markdown("---")
-            # Botão principal para iniciar a comparação
-            if st.button("📊 Comparar Todas as Propostas", type="primary", use_container_width=True, key="btn_comparar_propostas"):
-                # Verificar se existem propostas para calcular
-                if not st.session_state.propostas_comerciais:
-                    st.warning("Por favor, adicione pelo menos uma proposta antes de comparar.")
-                else:
-                    resultados_finais = []
-                    barra_progresso = st.progress(0.0, text="A iniciar comparação...")
+            st.subheader("🛠️ Assistente de Dimensionamento de Sistema")
 
-                    num_propostas = len(st.session_state.propostas_comerciais)
-                    
-                    # Loop principal que calcula cada proposta
-                    for i, prop in enumerate(st.session_state.propostas_comerciais):
-                        barra_progresso.progress((i + 1) / num_propostas, text=f"A simular: {prop['nome']}...")
+            with st.expander("Calcular e comparar vários cenários de potência e armazenamento", expanded=False):
+                st.info("Selecione várias opções de painéis e baterias para comparar o seu desempenho financeiro lado a lado.")
 
-                        # 1. Simulação Solar
+                st.markdown("##### Custos de Referência para Estimativa")
+                col_custo1, col_custo2 = st.columns(2)
+                with col_custo1:
+                    custo_por_kwp = st.number_input("Custo por kWp de painéis (€)", value=750, step=50)
+                with col_custo2:
+                    custo_por_kwh = st.number_input("Custo por kWh de bateria (€)", value=300, step=50)
+
+
+                # Opções de potências e baterias para o utilizador escolher
+                opcoes_paineis_kwp = [0.0, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0] # 0.0 representa "Sem novos paineis"
+                opcoes_bateria_kwh = [0.0, 5.0, 7.5, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0] # 0.0 representa "Sem Bateria"
+
+                col_dim1, col_dim2 = st.columns(2)
+                with col_dim1:
+                    potencias_a_testar = st.multiselect("Potências de Painéis (kWp) a testar:", opcoes_paineis_kwp, default=[2.0, 3.0, 4.0])
+                with col_dim2:
+                    baterias_a_testar = st.multiselect("Capacidades de Bateria (kWh) a testar:", opcoes_bateria_kwh, default=[0.0, 5.0, 10.0])
+
+                # --- LÓGICA DE CONTROLO E LIMITE ---
+                num_combinacoes = len(potencias_a_testar) * len(baterias_a_testar)
+                LIMITE_COMBINACOES = 16 # O nosso limite prático
+
+                if num_combinacoes > 0:
+                    st.write(f"Total de combinações a calcular: **{num_combinacoes}**")
+
+                botao_desativado = False
+                if num_combinacoes > LIMITE_COMBINACOES:
+                    st.warning(f"Selecionou {num_combinacoes} combinações. Para garantir um tempo de cálculo razoável, por favor selecione um máximo de {LIMITE_COMBINACOES} combinações.")
+                    botao_desativado = True
+                elif num_combinacoes == 0:
+                    botao_desativado = True
+
+                if st.button("Analisar Dimensionamento", disabled=botao_desativado, use_container_width=True, type="primary"):
+                    resultados_dimensionamento = []
+                    barra_progresso = st.progress(0.0, text="A iniciar cálculos...")
+
+                    total_a_calcular = num_combinacoes
+                    calculo_atual = 0
+
+                    # Loop principal que itera por todas as combinações
+                    for p_kwp in potencias_a_testar:
                         df_solar, _, _ = calc.simular_autoconsumo_completo(
-                            st.session_state.df_analise_original, prop['kwp'],
+                            st.session_state.df_analise_original, p_kwp,
                             st.session_state.solar_latitude, st.session_state.solar_longitude,
                             st.session_state.solar_inclinacao, st.session_state.solar_orientacao_graus,
                             st.session_state.solar_loss,
@@ -1962,84 +1814,258 @@ if is_diagram_mode:
                             st.session_state.distrito_selecionado,
                             st.session_state.solar_sombra
                         )
-                        df_pre_bateria_prop = calc.aplicar_simulacao_solar_aos_dados_base(st.session_state.df_analise_original, df_solar)
+                        df_pre_bateria_cenario = calc.aplicar_simulacao_solar_aos_dados_base(st.session_state.df_analise_original, df_solar)
 
-                        # 2. Simulação da Bateria (se aplicável)
-                        df_final_prop = df_pre_bateria_prop.copy()
-                        if prop['kwh_bat'] > 0:
-                            df_para_bateria_prop = df_pre_bateria_prop.rename(columns={'Injecao_Rede_Final_kWh': 'Excedente_kWh', 'Consumo_Rede_Final_kWh': 'Consumo_Rede_kWh'})
-                            df_final_prop = calc.simular_bateria(
-                                df_para_bateria_prop, prop['kwh_bat'], prop['kwh_bat']/2,
-                                st.session_state.bat_eficiencia, st.session_state.bat_dod
+                        for b_kwh in baterias_a_testar:
+                            calculo_atual += 1
+                            percentagem = calculo_atual / total_a_calcular
+                            barra_progresso.progress(percentagem, text=f"A calcular {calculo_atual}/{total_a_calcular}: Painéis {p_kwp:.1f} kWp, Bateria {b_kwh:.1f} kWh...")
+
+                            df_para_bateria = df_pre_bateria_cenario[['DataHora', 'Injecao_Rede_Final_kWh', 'Consumo_Rede_Final_kWh']].copy()
+                            df_para_bateria.rename(columns={'Injecao_Rede_Final_kWh': 'Excedente_kWh', 'Consumo_Rede_Final_kWh': 'Consumo_Rede_kWh'}, inplace=True)
+
+                            if b_kwh > 0:
+                                df_com_bateria = calc.simular_bateria(
+                                    df_com_solar=df_para_bateria,
+                                    capacidade_kwh=b_kwh, potencia_kw=b_kwh/2,
+                                    eficiencia_perc=st.session_state.bat_eficiencia, dod_perc=st.session_state.bat_dod
+                                )
+                                # Renomeamos as colunas aqui para o padrão esperado pela função financeira
+                                df_final_cenario = df_com_bateria.rename(columns={'Consumo_Rede_kWh': 'Consumo_Rede_Final_kWh', 'Excedente_kWh': 'Injecao_Rede_Final_kWh'})
+                            else:
+                                # Se não há bateria, apenas renomeamos as colunas do cenário solar
+                                df_final_cenario = df_para_bateria.rename(columns={'Consumo_Rede_kWh': 'Consumo_Rede_Final_kWh', 'Excedente_kWh': 'Injecao_Rede_Final_kWh'})
+
+                            # --- INÍCIO DO BLOCO DE CÁLCULO FINANCEIRO ---
+                            financeiro_cenario = calc.calcular_valor_financeiro_cenario(
+                                df_cenario=df_final_cenario,
+                                df_omie_completo=OMIE_CICLOS,
+                                precos_compra_kwh_siva=precos_energia_siva,
+                                dias_calculo=dias,
+                                potencia_kva=st.session_state.sel_potencia,
+                                opcao_horaria_str=st.session_state.sel_opcao_horaria,
+                                familia_numerosa_bool=is_familia_numerosa,
+                                modelo_venda=modelo_venda,
+                                tipo_comissao=tipo_comissao,
+                                valor_comissao=valor_comissao
                             )
 
-                        # 3. Cálculo Financeiro
-                        financeiro_prop = calc.calcular_valor_financeiro_cenario(
-                            df_cenario=df_final_prop, df_omie_completo=OMIE_CICLOS,
-                            precos_compra_kwh_siva=precos_energia_siva, dias_calculo=dias,
-                            potencia_kva=st.session_state.sel_potencia, opcao_horaria_str=st.session_state.sel_opcao_horaria,
-                            familia_numerosa_bool=is_familia_numerosa, modelo_venda=modelo_venda,
-                            tipo_comissao=tipo_comissao, valor_comissao=valor_comissao
-                        )
+                            # Calcula as poupanças anuais base para o payback
+                            financeiro_atual = st.session_state.financeiro_atual
+                            custo_evitado_periodo = financeiro_atual['custo_compra_c_iva'] - financeiro_cenario['custo_compra_c_iva']
+                            receita_adicional_periodo = financeiro_cenario['receita_venda'] - financeiro_atual['receita_venda']
+                            custo_evitado_anual = (custo_evitado_periodo * (365.25 / dias)) if dias > 0 else 0
+                            receita_adicional_anual = (receita_adicional_periodo * (365.25 / dias)) if dias > 0 else 0
+                            poupanca_anual_total = custo_evitado_anual + receita_adicional_anual
 
-                        # 4. Cálculo do Payback
-                        financeiro_atual = st.session_state.financeiro_atual
-                        custo_evitado_anual = ((financeiro_atual['custo_compra_c_iva'] - financeiro_prop['custo_compra_c_iva']) * (365.25 / dias))
-                        receita_adicional_anual = ((financeiro_prop['receita_venda'] - financeiro_atual['receita_venda']) * (365.25 / dias))
-                        
-                        analise_lp = calc.calcular_analise_longo_prazo(
-                            custo_instalacao=prop['custo'], poupanca_autoconsumo_anual_base=custo_evitado_anual,
-                            poupanca_venda_anual_base=receita_adicional_anual, anos_analise=st.session_state.num_anos_analise,
-                            taxa_degradacao_perc=st.session_state.slider_degradacao, taxa_inflacao_energia_perc=st.session_state.slider_inflacao_energia,
-                            taxa_variacao_venda_perc=st.session_state.slider_variacao_venda
-                        )
+                            custo_estimado = p_kwp * custo_por_kwp + b_kwh * custo_por_kwh
 
-                        # Guardar os resultados para esta proposta
-                        resultados_finais.append({
-                            "Proposta": prop['nome'], "Painéis (kWp)": prop['kwp'], "Bateria (kWh)": prop['kwh_bat'],
-                            "Custo Total (€)": prop['custo'], "Poupança Anual (€)": custo_evitado_anual + receita_adicional_anual,
-                            # --- Adicionar ROI aos resultados ---
-                            "ROI Anual (%)": analise_lp['roi_simples_anual'],
-                            "Payback (anos)": analise_lp['payback_detalhado'],
-                            "Poupança a 25 anos (€)": analise_lp['poupanca_total_periodo'] if st.session_state.num_anos_analise == 25 else "N/A"
-                        })
+                            # Chama o payback com as variáveis corretas
+                            analise_lp = calc.calcular_analise_longo_prazo(
+                                custo_instalacao=custo_estimado, # Usa o custo estimado para este cenário
+                                poupanca_autoconsumo_anual_base=custo_evitado_anual,
+                                poupanca_venda_anual_base=receita_adicional_anual,
+                                anos_analise=st.session_state.num_anos_analise, # Obtém da UI principal
+                                taxa_degradacao_perc=st.session_state.slider_degradacao,
+                                taxa_inflacao_energia_perc=st.session_state.slider_inflacao_energia,
+                                taxa_variacao_venda_perc=st.session_state.slider_variacao_venda
+                            )
 
-                    
+                            resultados_dimensionamento.append({
+                                "Painéis (kWp)": p_kwp,
+                                "Bateria (kWh)": b_kwh,
+                                "Custo Estimado (€)": custo_estimado,
+                                "Poupança Anual (€)": round(poupanca_anual_total),
+                                "Payback (anos)": round(analise_lp['payback_detalhado'], 1) if analise_lp['payback_detalhado'] != float('inf') else '>30'
+                            })
+
                     barra_progresso.empty()
-                    st.session_state.resultados_comparacao = resultados_finais # Guardar no estado para exibição
-                    st.rerun()
 
-        # Bloco para exibir os resultados da comparação, se existirem
-        if 'resultados_comparacao' in st.session_state and st.session_state.resultados_comparacao:
-            st.markdown("### Resultados da Comparação")
-            
-            df_resultados = pd.DataFrame(st.session_state.resultados_comparacao)
+                    if resultados_dimensionamento:
+                        df_resultados = pd.DataFrame(resultados_dimensionamento)
+                        st.markdown("### Resultados Comparativos")
+                        df_resultados_styled = df_resultados.style.highlight_min(
+                            subset=['Payback (anos)'], color='lightgreen'
+                        ).format(
+                            # Usar a função formatar_numero_pt para cada coluna
+                            formatter={
+                                "Custo Estimado (€)": lambda x: formatar_numero_pt(x, casas_decimais=0, sufixo=" €"),
+                                "Poupança Anual (€)": lambda x: formatar_numero_pt(x, casas_decimais=0, sufixo=" €"),
+                                "Painéis (kWp)": lambda x: formatar_numero_pt(x, casas_decimais=1),
+                                "Bateria (kWh)": lambda x: formatar_numero_pt(x, casas_decimais=1),
+                                # Lógica especial para o Payback, para não formatar o texto '>30'
+                                "Payback (anos)": lambda x: formatar_numero_pt(x, casas_decimais=1) if isinstance(x, (int, float)) else x
+                            }
+                        )
+                        st.dataframe(df_resultados_styled, use_container_width=True)
 
-            # --- NOVO: Atualizar o estilo para incluir o ROI ---
-            df_resultados_styled = df_resultados.style.highlight_min(
-                subset=['Payback (anos)'], color='#D4EDDA'
-            ).highlight_max(
-                subset=['Poupança Anual (€)', 'Poupança a 25 anos (€)', 'ROI Anual (%)'], color='#D4EDDA' # Adicionar ROI aqui
-            ).format(formatter={
-                "Custo Total (€)": lambda x: formatar_numero_pt(x, casas_decimais=0, sufixo=" €"),
-                "Poupança Anual (€)": lambda x: formatar_numero_pt(x, casas_decimais=0, sufixo=" €"),
-                "Poupança a 25 anos (€)": lambda x: formatar_numero_pt(x, casas_decimais=0, sufixo=" €") if isinstance(x, (int, float)) else x,
-                "Payback (anos)": lambda x: formatar_numero_pt(x, casas_decimais=1) if x != float('inf') else '>30',
-                "ROI Anual (%)": lambda x: formatar_numero_pt(x, casas_decimais=1, sufixo=" %"), # Adicionar formatação para ROI
-                "Painéis (kWp)": "{:.2f}", "Bateria (kWh)": "{:.1f}",
-            })
-            st.dataframe(df_resultados_styled, use_container_width=True, hide_index=True)
+        st.markdown("---")
+        st.subheader("⚖️ Comparador de Propostas Comerciais")
 
-            # Gerar e exibir o gráfico de Payback
-            dados_grafico = {
-                'titulo': 'Comparação do Payback por Proposta',
-                'series_data': df_resultados.rename(columns={'Proposta': 'name', 'Payback (anos)': 'y'})[['name', 'y']].to_dict('records')
-            }
-            # Ordenar pelo payback para o gráfico ficar mais claro
-            dados_grafico['series_data'] = sorted(dados_grafico['series_data'], key=lambda x: x['y'])
-            
-            html_grafico_payback = gfx.gerar_grafico_payback('grafico_payback_propostas', dados_grafico)
-            st.components.v1.html(html_grafico_payback, height=350)
+        # Obter o distrito selecionado a partir do estado da sessão para usar no texto
+        distrito_selecionado = st.session_state.get('distrito_selecionado', 'N/A')
+        texto_expander = f"Introduza e compare propostas de diferentes instaladores (Localização utilizada: Distrito de **{distrito_selecionado}**. Pode alterar em **Simular sistema Solar**)"
+
+        with st.expander(texto_expander, expanded=False):            
+            # Inicializar a lista de propostas no estado da sessão, se não existir
+            if 'propostas_comerciais' not in st.session_state:
+                st.session_state.propostas_comerciais = []
+
+            st.info("Adicione os detalhes das propostas que recebeu. O simulador usará os parâmetros de localização e orientação definidos acima para garantir uma comparação justa.")
+
+            # Usamos um formulário para adicionar propostas, para não recarregar a página a cada input
+            with st.form("form_add_proposta", clear_on_submit=True):
+                st.markdown("##### Adicionar Nova Proposta")
+                col_prop1, col_prop2, col_prop3, col_prop4 = st.columns(4)
+                with col_prop1:
+                    nome_proposta = st.text_input("Nome da Proposta", placeholder="Ex: Empresa Solar")
+                with col_prop2:
+                    kwp_proposta = st.number_input("Painéis (kWp)", min_value=0.0, step=0.1, format="%.2f")
+                with col_prop3:
+                    kwh_bateria_proposta = st.number_input("Bateria (kWh)", min_value=0.0, step=0.1, format="%.1f")
+                with col_prop4:
+                    custo_proposta = st.number_input("Custo Total (€)", min_value=0.0, step=100.0, format="%.2f")
+
+                submitted = st.form_submit_button("Adicionar Proposta à Lista")
+                if submitted and nome_proposta:
+                    nova_proposta = {
+                        "nome": nome_proposta,
+                        "kwp": kwp_proposta,
+                        "kwh_bat": kwh_bateria_proposta,
+                        "custo": custo_proposta
+                    }
+                    st.session_state.propostas_comerciais.append(nova_proposta)
+                    st.rerun() # Recarrega para mostrar a lista atualizada
+
+            # Exibir a lista de propostas adicionadas
+            if st.session_state.propostas_comerciais:
+                st.markdown("---")
+                st.markdown("##### Propostas para Comparar")
+                
+                for i, prop in enumerate(st.session_state.propostas_comerciais):
+                    cols_lista = st.columns([3, 2, 2, 2, 1])
+                    cols_lista[0].write(f"**{prop['nome']}**")
+                    cols_lista[1].write(f"{prop['kwp']} kWp")
+                    cols_lista[2].write(f"{prop['kwh_bat']} kWh")
+                    cols_lista[3].write(f"{formatar_numero_pt(prop['custo'], sufixo=' €')}")
+                    
+                    # Botão para remover a proposta
+                    if cols_lista[4].button("Remover", key=f"del_{i}"):
+                        st.session_state.propostas_comerciais.pop(i)
+                        st.rerun()
+                
+                st.markdown("---")
+                # Botão principal para iniciar a comparação
+                if st.button("📊 Comparar Todas as Propostas", type="primary", use_container_width=True, key="btn_comparar_propostas"):
+                    # Verificar se existem propostas para calcular
+                    if not st.session_state.propostas_comerciais:
+                        st.warning("Por favor, adicione pelo menos uma proposta antes de comparar.")
+                    else:
+                        resultados_finais = []
+                        barra_progresso = st.progress(0.0, text="A iniciar comparação...")
+
+                        num_propostas = len(st.session_state.propostas_comerciais)
+                        
+                        # Loop principal que calcula cada proposta
+                        for i, prop in enumerate(st.session_state.propostas_comerciais):
+                            barra_progresso.progress((i + 1) / num_propostas, text=f"A simular: {prop['nome']}...")
+
+                            # 1. Simulação Solar
+                            df_solar, _, _ = calc.simular_autoconsumo_completo(
+                                st.session_state.df_analise_original, prop['kwp'],
+                                st.session_state.solar_latitude, st.session_state.solar_longitude,
+                                st.session_state.solar_inclinacao, st.session_state.solar_orientacao_graus,
+                                st.session_state.solar_loss,
+                                "free" if st.session_state.solar_montagem == "Instalação livre (free-standing)" else "building",
+                                st.session_state.distrito_selecionado,
+                                st.session_state.solar_sombra
+                            )
+                            df_pre_bateria_prop = calc.aplicar_simulacao_solar_aos_dados_base(st.session_state.df_analise_original, df_solar)
+
+                            # 2. Simulação da Bateria (se aplicável)
+                            df_final_prop = df_pre_bateria_prop.copy()
+                            if prop['kwh_bat'] > 0:
+                                df_para_bateria_prop = df_pre_bateria_prop.rename(columns={'Injecao_Rede_Final_kWh': 'Excedente_kWh', 'Consumo_Rede_Final_kWh': 'Consumo_Rede_kWh'})
+                                
+                                # Passo 1: Correr a simulação da bateria
+                                df_com_bateria_resultado = calc.simular_bateria(
+                                    df_para_bateria_prop, prop['kwh_bat'], prop['kwh_bat']/2,
+                                    st.session_state.bat_eficiencia, st.session_state.bat_dod
+                                )
+
+                                # Passo 2: Renomear as colunas de volta para o nome esperado pela função financeira
+                                df_final_prop = df_com_bateria_resultado.rename(columns={
+                                    'Consumo_Rede_kWh': 'Consumo_Rede_Final_kWh', 
+                                    'Excedente_kWh': 'Injecao_Rede_Final_kWh'
+                                })
+
+                            # 3. Cálculo Financeiro
+                            financeiro_prop = calc.calcular_valor_financeiro_cenario(
+                                df_cenario=df_final_prop, df_omie_completo=OMIE_CICLOS,
+                                precos_compra_kwh_siva=precos_energia_siva, dias_calculo=dias,
+                                potencia_kva=st.session_state.sel_potencia, opcao_horaria_str=st.session_state.sel_opcao_horaria,
+                                familia_numerosa_bool=is_familia_numerosa, modelo_venda=modelo_venda,
+                                tipo_comissao=tipo_comissao, valor_comissao=valor_comissao, venda_excedente_ativa=venda_excedente_ativa_ui
+                            )
+
+                            # 4. Cálculo do Payback
+                            financeiro_atual = st.session_state.financeiro_atual
+                            custo_evitado_anual = ((financeiro_atual['custo_compra_c_iva'] - financeiro_prop['custo_compra_c_iva']) * (365.25 / dias))
+                            receita_adicional_anual = ((financeiro_prop['receita_venda'] - financeiro_atual['receita_venda']) * (365.25 / dias))
+                            
+                            analise_lp = calc.calcular_analise_longo_prazo(
+                                custo_instalacao=prop['custo'], poupanca_autoconsumo_anual_base=custo_evitado_anual,
+                                poupanca_venda_anual_base=receita_adicional_anual, anos_analise=st.session_state.num_anos_analise,
+                                taxa_degradacao_perc=st.session_state.slider_degradacao, taxa_inflacao_energia_perc=st.session_state.slider_inflacao_energia,
+                                taxa_variacao_venda_perc=st.session_state.slider_variacao_venda
+                            )
+
+                            # Guardar os resultados para esta proposta
+                            resultados_finais.append({
+                                "Proposta": prop['nome'], "Painéis (kWp)": prop['kwp'], "Bateria (kWh)": prop['kwh_bat'],
+                                "Custo Total (€)": prop['custo'], "Poupança Anual (€)": custo_evitado_anual + receita_adicional_anual,
+                                # --- Adicionar ROI aos resultados ---
+                                "ROI Anual (%)": analise_lp['roi_simples_anual'],
+                                "Payback (anos)": analise_lp['payback_detalhado'],
+                                "Poupança a 25 anos (€)": analise_lp['poupanca_total_periodo'] if st.session_state.num_anos_analise == 25 else "N/A"
+                            })
+
+                        
+                        barra_progresso.empty()
+                        st.session_state.resultados_comparacao = resultados_finais # Guardar no estado para exibição
+                        st.rerun()
+
+            # Bloco para exibir os resultados da comparação, se existirem
+            if 'resultados_comparacao' in st.session_state and st.session_state.resultados_comparacao:
+                st.markdown("### Resultados da Comparação")
+                
+                df_resultados = pd.DataFrame(st.session_state.resultados_comparacao)
+
+                # --- NOVO: Atualizar o estilo para incluir o ROI ---
+                df_resultados_styled = df_resultados.style.highlight_min(
+                    subset=['Payback (anos)'], color='#D4EDDA'
+                ).highlight_max(
+                    subset=['Poupança Anual (€)', 'Poupança a 25 anos (€)', 'ROI Anual (%)'], color='#D4EDDA' # Adicionar ROI aqui
+                ).format(formatter={
+                    "Custo Total (€)": lambda x: formatar_numero_pt(x, casas_decimais=0, sufixo=" €"),
+                    "Poupança Anual (€)": lambda x: formatar_numero_pt(x, casas_decimais=0, sufixo=" €"),
+                    "Poupança a 25 anos (€)": lambda x: formatar_numero_pt(x, casas_decimais=0, sufixo=" €") if isinstance(x, (int, float)) else x,
+                    "Payback (anos)": lambda x: formatar_numero_pt(x, casas_decimais=1) if x != float('inf') else '>30',
+                    "ROI Anual (%)": lambda x: formatar_numero_pt(x, casas_decimais=1, sufixo=" %"), # Adicionar formatação para ROI
+                    "Painéis (kWp)": "{:.2f}", "Bateria (kWh)": "{:.1f}",
+                })
+                st.dataframe(df_resultados_styled, use_container_width=True, hide_index=True)
+
+                # Gerar e exibir o gráfico de Payback
+                dados_grafico = {
+                    'titulo': 'Comparação do Payback por Proposta',
+                    'series_data': df_resultados.rename(columns={'Proposta': 'name', 'Payback (anos)': 'y'})[['name', 'y']].to_dict('records')
+                }
+                # Ordenar pelo payback para o gráfico ficar mais claro
+                dados_grafico['series_data'] = sorted(dados_grafico['series_data'], key=lambda x: x['y'])
+                
+                html_grafico_payback = gfx.gerar_grafico_payback('grafico_payback_propostas', dados_grafico)
+                st.components.v1.html(html_grafico_payback, height=350)
 
     ### INÍCIO SECÇÃO DE ANÁLISE DE POTÊNCIA ###
     st.markdown("---") # Separador visual antes da secção de análise de potência
@@ -2131,20 +2157,21 @@ st.subheader("Redes sociais, onde poderão seguir o projeto:")
 
 # URLs das redes sociais
 url_x = "https://x.com/tiagofelicia"
-url_bluesky = "https://bsky.app/profile/tiagofelicia.bsky.social"
+url_facebook = "https://www.facebook.com/profile.php?id=61555007360529"
+url_instagram = "https://www.instagram.com/tiago_felicia/"
 url_youtube = "https://youtube.com/@tiagofelicia"
-url_facebook_perfil = "https://www.facebook.com/profile.php?id=61555007360529"
-
+url_tiktok = "https://www.tiktok.com/@Tiago_Felicia"
 
 icon_url_x = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/X_icon.svg/120px-X_icon.svg.png?20250519203220"
-icon_url_bluesky = "https://upload.wikimedia.org/wikipedia/commons/7/7a/Bluesky_Logo.svg"
-icon_url_youtube = "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/YouTube_full-color_icon_%282024%29.svg/120px-YouTube_full-color_icon_%282024%29.svg.png"
 icon_url_facebook = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/2023_Facebook_icon.svg/120px-2023_Facebook_icon.svg.png"
+icon_url_instagram = "https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png"
+icon_url_youtube = "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/YouTube_full-color_icon_%282024%29.svg/120px-YouTube_full-color_icon_%282024%29.svg.png"
+icon_url_tiktok = "https://upload.wikimedia.org/wikipedia/commons/a/a6/Tiktok_icon.svg"
 
 
 svg_icon_style_dark_mode_friendly = "filter: invert(0.8) sepia(0) saturate(1) hue-rotate(0deg) brightness(1.5) contrast(0.8);"
 
-col_social1, col_social2, col_social3, col_social4 = st.columns(4)
+col_social1, col_social2, col_social3, col_social4, col_social5 = st.columns(5)
 
 with col_social1:
     st.markdown(
@@ -2160,15 +2187,26 @@ with col_social1:
 with col_social2:
     st.markdown(
         f"""
-        <a href="{url_bluesky}" target="_blank" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center; text-align: center;">
-            <img src="{icon_url_bluesky}" width="40" alt="Bluesky" style="margin-bottom: 8px; object-fit: contain;">
-            Bluesky
+        <a href="{url_facebook}" target="_blank" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center; text-align: center;">
+            <img src="{icon_url_facebook}" width="40" alt="Facebook" style="margin-bottom: 8px; object-fit: contain;">
+            Facebook
         </a>
         """,
         unsafe_allow_html=True
     )
 
 with col_social3:
+    st.markdown(
+        f"""
+        <a href="{url_instagram}" target="_blank" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center; text-align: center;">
+            <img src="{icon_url_instagram}" width="40" alt="Instagram" style="margin-bottom: 8px; object-fit: contain;">
+            Instagram
+        </a>
+        """,
+        unsafe_allow_html=True
+    )
+
+with col_social4:
     st.markdown(
         f"""
         <a href="{url_youtube}" target="_blank" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center; text-align: center;">
@@ -2179,23 +2217,22 @@ with col_social3:
         unsafe_allow_html=True
     )
 
-with col_social4:
+with col_social5:
     st.markdown(
         f"""
-        <a href="{url_facebook_perfil}" target="_blank" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center; text-align: center;">
-            <img src="{icon_url_facebook}" width="40" alt="Facebook" style="margin-bottom: 8px; object-fit: contain;">
-            Facebook
+        <a href="{url_tiktok}" target="_blank" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center; text-align: center;">
+            <img src="{icon_url_tiktok}" width="40" alt="Tiktok" style="margin-bottom: 8px; object-fit: contain;">
+            Tiktok
         </a>
         """,
         unsafe_allow_html=True
     )
-
 st.markdown("<br>", unsafe_allow_html=True) # Adiciona um espaço vertical
 
 # Texto de Copyright
 ano_copyright = 2025
 nome_autor = "Tiago Felícia"
-texto_copyright_html = f"© {ano_copyright} Todos os direitos reservados | {nome_autor} | <a href='{url_facebook_perfil}' target='_blank' style='color: inherit;'>Facebook</a>"
+texto_copyright_html = f"© {ano_copyright} Todos os direitos reservados | {nome_autor}"
 
 st.markdown(
     f"<div style='text-align: center; font-size: 0.9em; color: grey;'>{texto_copyright_html}</div>",

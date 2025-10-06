@@ -1357,12 +1357,26 @@ def gerar_relatorio_pdf(dados_relatorio):
     pdf.cell(0, 10, '1. Parâmetros da Simulação', 0, 1, 'L')
     pdf.set_font('NotoSans', '', 9)
     params = dados_relatorio['parametros']
-    pdf.multi_cell(0, 5, 
-        f"Período de Análise: {params['data_inicio']} a {params['data_fim']} ({params['dias']} dias)\n"
-        f"Localização: Lat {params['latitude']:.4f}, Lon {params['longitude']:.4f} (Distrito: {params['distrito']})\n"
-        f"Sistema Solar: {params['paineis_kwp']:.2f} kWp, Inclinação {params['inclinacao']}°, Orientação {params['orientacao']}°, Perdas {params['perdas']}%, Sombreamento {params['sombra']}% \n"
-        f"Bateria: {params['bateria_kwh']:.2f} kWh de capacidade, {params['bateria_kw']:.2f} kW de potência"
-    )
+
+    # --- LÓGICA DINÂMICA PARA CONSTRUIR O TEXTO ---
+    # 1. Começamos com uma lista que contém a informação base (sempre presente)
+    linhas_parametros = []
+    linhas_parametros.append(f"Período de Análise: {params['data_inicio']} a {params['data_fim']} ({params['dias']} dias)")
+
+    # 2. Verificamos se a simulação de painéis foi ativada para adicionar os detalhes
+    if params.get('simulou_paineis', False):
+        linhas_parametros.append(f"Localização: Lat {params['latitude']:.4f}, Lon {params['longitude']:.4f} (Distrito: {params['distrito']})")
+        linhas_parametros.append(f"Sistema Solar: {params['paineis_kwp']:.2f} kWp, Inclinação {params['inclinacao']}°, Orientação {params['orientacao']}°, Perdas {params['perdas']}%, Sombreamento {params['sombra']}%")
+
+    # 3. Verificamos se a simulação de bateria foi ativada para adicionar os seus detalhes
+    if params.get('simulou_bateria', False):
+        linhas_parametros.append(f"Bateria: {params['bateria_kwh']:.2f} kWh de capacidade, {params['bateria_kw']:.2f} kW de potência")
+
+    # 4. Juntamos todas as linhas da lista com um caracter de nova linha
+    texto_final_parametros = "\n".join(linhas_parametros)
+    
+    # 5. Escrevemos o texto final no PDF
+    pdf.multi_cell(0, 5, texto_final_parametros)
     pdf.ln(5)
 
     # --- Secção 2: Resumo Energético ---
