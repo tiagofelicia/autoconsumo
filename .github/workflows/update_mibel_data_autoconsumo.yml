@@ -2,16 +2,14 @@ name: Atualizar Dados MIBEL
 
 on:
   schedule:
-    - cron: '5 11 * * 1-5'
-    - cron: '55 17 * * 1-5'
-    - cron: '5 11 * * 6,0'
+    - cron: '0 20 * * 0-6'
+
   workflow_dispatch:
 
 jobs:
   run-mibel-job:
     name: Executar Atualização MIBEL
     runs-on: ubuntu-latest
-
     permissions:
       contents: write
 
@@ -20,11 +18,16 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configurar R
-        # Adicionamos um 'id' para que o passo de cache possa referenciar a versão do R
+        # Adicionamos um 'id' para que o passo de cache possa usar a versão do R na sua chave
         id: setup-r
         uses: r-lib/actions/setup-r@v2.4.0
         with:
           r-version: '4.4.1'
+
+      - name: Instalar dependências de sistema
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcurl4-openssl-dev
 
       # =================================================================
       # PASSO NOVO: Guardar e restaurar os pacotes R instalados
@@ -34,13 +37,13 @@ jobs:
         with:
           # O caminho para a pasta onde os pacotes R são instalados
           path: ${{ env.R_LIBS_USER }}
-          # Uma chave única para identificar o cache. Se o script R mudar, o cache é invalidado.
-          key: ${{ runner.os }}-r-${{ steps.setup-r.outputs.r-version }}-${{ hashFiles('scripts/atualizacao_eletricidade_MIBEL.r') }}
+          # Uma chave única para identificar o cache. Se o script R mudar, o cache é recriado.
+          key: ${{ runner.os }}-r-${{ steps.setup-r.outputs.r-version }}-${{ hashFiles('scripts/atualizacao_autoconsumo_MIBEL.r') }}
           restore-keys: |
             ${{ runner.os }}-r-${{ steps.setup-r.outputs.r-version }}-
 
       - name: Instalar pacotes R
-        # Este passo agora só instala pacotes se não existirem no cache
+        # Este passo agora só instala os pacotes que não foram restaurados do cache
         run: |
           install.packages(c('dplyr', 'stringr', 'lubridate', 'httr', 'rvest', 'tidyr', 'purrr', 'readxl', 'openxlsx', 'readr'))
         shell: Rscript {0}
@@ -49,22 +52,22 @@ jobs:
         run: |
           mkdir -p logs
           start_time=$(date +%s)
-          echo "=== Execução iniciada em $(date -d @$start_time '+%Y-%m-%d %H:%M:%S') ===" >> logs/atualizacao_eletricidade_MIBEL.log
+          echo "=== Execução iniciada em $(date -d @$start_time '+%Y-%m-%d %H:%M:%S') ===" >> logs/atualizacao_autoconsumo_MIBEL.log
           
-          Rscript scripts/atualizacao_eletricidade_MIBEL.r >> logs/atualizacao_eletricidade_MIBEL.log 2>&1
+          Rscript scripts/atualizacao_autoconsumo_MIBEL.r >> logs/atualizacao_autoconsumo_MIBEL.log 2>&1
           
           end_time=$(date +%s)
-          echo "=== Execução terminada em $(date -d @$end_time '+%Y-%m-%d %H:%M:%S') ===" >> logs/atualizacao_eletricidade_MIBEL.log
+          echo "=== Execução terminada em $(date -d @$end_time '+%Y-%m-%d %H:%M:%S') ===" >> logs/atualizacao_autoconsumo_MIBEL.log
           runtime=$((end_time-start_time))
-          echo "Duração total: ${runtime} segundos." >> logs/atualizacao_eletricidade_MIBEL.log
-          echo "" >> logs/atualizacao_eletricidade_MIBEL.log
+          echo "Duração total: ${runtime} segundos." >> logs/atualizacao_autoconsumo_MIBEL.log
+          echo "" >> logs/atualizacao_autoconsumo_MIBEL.log
 
       - name: Fazer upload do log como artefacto
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: log_atualizacao_eletricidade_MIBEL
-          path: logs/atualizacao_eletricidade_MIBEL.log
+          name: log_atualizacao_autoconsumo_MIBEL
+          path: logs/atualizacao_autoconsumo_MIBEL.log
 
       - name: Verificar se houve alterações
         id: git-check
