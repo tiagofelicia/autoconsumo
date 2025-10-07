@@ -198,3 +198,103 @@ Caused by warning:
 === Execução terminada em 2025-10-06 19:16:08 ===
 Duração total: 7 segundos.
 
+=== Execução iniciada em 2025-10-07 17:43:28 ===
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: ‘lubridate’
+
+The following objects are masked from ‘package:base’:
+
+    date, intersect, setdiff, union
+
+
+Attaching package: ‘readr’
+
+The following object is masked from ‘package:rvest’:
+
+    guess_encoding
+
+✅ Bibliotecas carregadas
+ℹ️ Data de início da atualização definida para: 2025-10-01
+⏳ A extrair dados de futuros do ficheiro OMIPdaily.xlsx...
+   - 1/4: A descarregar o ficheiro do URL...
+   - 2/4: Ficheiro descarregado. A extrair a data do relatório...
+New names:
+• `` -> `...1`
+   - Data do relatório extraída: 2025-10-07
+   - 3/4: Ficheiro descarregado. A ler os dados...
+New names:
+• `` -> `...1`
+• `` -> `...2`
+• `` -> `...3`
+• `` -> `...4`
+• `` -> `...5`
+• `` -> `...6`
+• `` -> `...7`
+• `` -> `...8`
+• `` -> `...9`
+• `` -> `...10`
+• `` -> `...11`
+• `` -> `...12`
+• `` -> `...13`
+• `` -> `...14`
+• `` -> `...15`
+• `` -> `...16`
+• `` -> `...17`
+• `` -> `...18`
+• `` -> `...19`
+• `` -> `...20`
+• `` -> `...21`
+   - 4/4: A processar, limpar e desdobrar os dados dos futuros...
+Warning message:
+There was 1 warning in `mutate()`.
+ℹ In argument: `Data = case_when(...)`.
+Caused by warning:
+!  21 failed to parse. 
+✅ Dados de futuros extraídos, processados e com priorização diária restaurada.
+⏳ 2a: A ler o ficheiro histórico 'MIBEL.xlsx' (em hora de Espanha)...
+⏳ 2b: A ler dados recentes do ano (INT_PBC_EV_H_ACUM.TXT)...
+Warning message:
+There were 3 warnings in `mutate()`.
+The first warning was:
+ℹ In argument: `Data = dmy(DataStr)`.
+Caused by warning:
+!  1 failed to parse.
+ℹ Run `dplyr::last_dplyr_warnings()` to see the 2 remaining warnings. 
+⏳ 2c: A ler dados do dia seguinte (INDICADORES.DAT)...
+⏳ 2d: A combinar fontes de dados com proteção de histórico...
+✅ Todas as fontes de dados OMIE foram combinadas e processadas.
+⏳ A combinar dados históricos e futuros...
+✅ Preços diários (reais e projetados) calculados.
+⏳ Passo 4: Preparar estrutura completa de quartos-horários (ES)...
+✅ Estrutura ES criada com número correto de quartos-horários e projeções aplicadas apenas onde necessário.
+⏳ Passo 5: A converter dados finais para a hora de Portugal (respeitando DST e quartos-horários irregulares)...
+✅ 35036 registos finais preparados em hora de Portugal.
+⚡ Validação automática de quartos-horários:
+# A tibble: 2 × 3
+  Data           n tipo               
+  <date>     <int> <chr>              
+1 2025-03-30    96 Normal (96 quartos)
+2 2025-10-26    96 Normal (96 quartos)
+⚠️ Aviso: Dias com número de quartos diferente do normal (96):
+# A tibble: 1 × 3
+  Data           n tipo                  
+  <date>     <int> <chr>                 
+1 2025-12-31    92 Primavera (92 quartos)
+⏳ A atualizar o ficheiro 'Simulador_☀️_Autoconsumo_Tiago_Felicia.xlsx'...
+✅ O ficheiro Excel foi atualizado com sucesso!
+   Data_Valores_OMIE = 2025-10-08
+   Data_Valores_OMIP = 2025-10-07
+=== Execução terminada em 2025-10-07 17:43:35 ===
+Duração total: 7 segundos.
+
