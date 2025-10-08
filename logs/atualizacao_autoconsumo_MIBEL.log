@@ -298,3 +298,55 @@ Caused by warning:
 === Execução terminada em 2025-10-07 17:43:35 ===
 Duração total: 7 segundos.
 
+=== Execução Python iniciada em 2025-10-08 09:56:59 ===
+Traceback (most recent call last):
+  File "/home/runner/work/autoconsumo/autoconsumo/scripts/atualizacao_autoconsumo_MIBEL.py", line 164, in run_update_process
+    wb = openpyxl.load_workbook(FICHEIRO_EXCEL)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.13/x64/lib/python3.11/site-packages/openpyxl/reader/excel.py", line 348, in load_workbook
+    reader.read()
+  File "/opt/hostedtoolcache/Python/3.11.13/x64/lib/python3.11/site-packages/openpyxl/reader/excel.py", line 303, in read
+    self.read_worksheets()
+  File "/opt/hostedtoolcache/Python/3.11.13/x64/lib/python3.11/site-packages/openpyxl/reader/excel.py", line 267, in read_worksheets
+    charts, images = find_images(self.archive, rel.target)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.13/x64/lib/python3.11/site-packages/openpyxl/reader/drawings.py", line 28, in find_images
+    src = archive.read(path)
+          ^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.13/x64/lib/python3.11/zipfile.py", line 1527, in read
+    with self.open(name, "r", pwd) as fp:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.13/x64/lib/python3.11/zipfile.py", line 1564, in open
+    zinfo = self.getinfo(name)
+            ^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.13/x64/lib/python3.11/zipfile.py", line 1493, in getinfo
+    raise KeyError(
+KeyError: "There is no item named 'xl/drawings/drawing1.xml' in the archive"
+✅ Bibliotecas carregadas
+ℹ️ Data de início da atualização definida para: 2025-10-01
+⚠️ MODO: Apenas dados reais OMIE (sem futuros)
+
+⏳ Passo 1: A ler e combinar dados OMIE (todos quarto-horários)...
+   - 1a: A ler 'MIBEL.xlsx'...
+   - 1b: A ler dados recentes (ACUM)...
+   - 1c: A ler dados do dia seguinte (INDICADORES)...
+   - 1d: A combinar fontes de dados...
+✅ Todas as fontes de dados OMIE foram combinadas.
+   📅 Última data com dados: 2025-10-08
+
+⏳ Passo 2: A criar estrutura completa até 2026...
+   - Dados reais até: 2025-10-08
+   - Estrutura criada até: 2026-12-31
+   - Registos com dados reais: 35137
+   - Registos vazios (futuros): 8068
+
+⏳ Passo 3: A converter para hora de Portugal...
+✅ 35036 registos totais preparados em hora de Portugal.
+   - Com dados reais: 26968
+   - Vazios (NaN): 8068
+✅ Todos os dias têm número de quartos esperado (92, 96 ou 100).
+
+⏳ Passo 4: A atualizar o ficheiro 'Simulador_☀️_Autoconsumo_Tiago_Felicia.xlsx'...
+❌ Ocorreu um erro inesperado: "There is no item named 'xl/drawings/drawing1.xml' in the archive"
+=== Execução terminada em 2025-10-08 09:57:08 ===
+Duração total: 9 segundos.
