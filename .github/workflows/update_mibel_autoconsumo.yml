@@ -1,8 +1,9 @@
+# --- update_mibel_autoconsumo.yml ---
 name: Atualizar Dados MIBEL (Autoconsumo)
 
 on:
   schedule:
-    - cron: '30 17 * * *' # Executa todos os dias às 17:30 UTC
+    - cron: '00 12 * * *' # Executa todos os dias às 12:00 UTC
 
   workflow_dispatch: # Permite execução manual
 
