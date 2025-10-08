@@ -1,3 +1,4 @@
+# --- atualizacao_autoconsumo_MIBEL.py ---
 # --- Carregar as bibliotecas necessárias ---
 import pandas as pd
 import numpy as np
@@ -187,3 +188,4 @@ def run_update_process():
 
 if __name__ == "__main__":
     run_update_process()
+
