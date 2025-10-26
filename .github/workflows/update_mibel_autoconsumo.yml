@@ -3,7 +3,10 @@ name: Atualizar Dados MIBEL (Autoconsumo)
 
 on:
   schedule:
-    - cron: '00 12 * * *' # Executa todos os dias às 12:00 UTC
+    # Horário VERÃO (WEST=UTC+1) -> 13:00 (Local)
+    - cron: '00 12 * * *' 
+    # Horário INVERNO (WET=UTC+0) -> 13:00 (Local)
+    - cron: '00 13 * * *'
 
   workflow_dispatch: # Permite execução manual
 
@@ -18,14 +21,34 @@ jobs:
       - name: Checkout do repositório
         uses: actions/checkout@v4
 
+      # --- Verifica se a hora local em Portugal é a correta ---
+      - name: Verificar hora local (Europe/Lisbon)
+        id: check_time
+        run: |
+          export TZ='Europe/Lisbon'
+          LOCAL_TIME=$(date +'%H:%M')
+          
+          echo "Hora local atual em Portugal: $LOCAL_TIME"
+          
+          # Verifica se a hora local é a hora de execução desejada (12:00)
+          if [ "$LOCAL_TIME" = "12:00" ]; then
+            echo "Hora correta. A definir should_run=true"
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          else
+            echo "Hora errada (é a execução do fuso horário oposto). A definir should_run=false"
+            echo "should_run=false" >> $GITHUB_OUTPUT
+          fi
+
       # --- CONFIGURAÇÃO DO AMBIENTE PYTHON ---
       - name: Configurar Python 3.11
+        if: steps.check_time.outputs.should_run == 'true' # <-- CONDIÇÃO ADICIONADA
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       # --- CACHE E INSTALAÇÃO DE DEPENDÊNCIAS PYTHON ---
       - name: Cache das dependências Python
+        if: steps.check_time.outputs.should_run == 'true' # <-- CONDIÇÃO ADICIONADA
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip # Pasta onde o pip guarda o cache
@@ -35,12 +58,14 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: Instalar dependências Python
+        if: steps.check_time.outputs.should_run == 'true' # <-- CONDIÇÃO ADICIONADA
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements_atualizacao_autoconsumo_MIBEL.txt
 
       # --- EXECUÇÃO DO SCRIPT PYTHON ---
       - name: Executar script de atualização Python com logging
+        if: steps.check_time.outputs.should_run == 'true' # <-- CONDIÇÃO ADICIONADA
         run: |
           mkdir -p logs
           start_time=$(date +%s)
@@ -54,7 +79,7 @@ jobs:
           echo "Duração total: ${runtime} segundos." >> logs/atualizacao_autoconsumo_MIBEL.log
 
       - name: Fazer upload do log como artefacto
-        if: always() # Executa sempre, mesmo que o passo anterior falhe
+        if: steps.check_time.outputs.should_run == 'true' && always() # <-- CONDIÇÃO MODIFICADA
         uses: actions/upload-artifact@v4
         with:
           name: log_atualizacao_autoconsumo_py
@@ -62,6 +87,7 @@ jobs:
 
       # --- COMMIT E PUSH DAS ALTERAÇÕES ---
       - name: Verificar se houve alterações
+        if: steps.check_time.outputs.should_run == 'true' # <-- CONDIÇÃO ADICIONADA
         id: git-check
         run: |
           git add -A
