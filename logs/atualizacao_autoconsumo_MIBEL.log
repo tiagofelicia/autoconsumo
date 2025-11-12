@@ -1719,3 +1719,34 @@ Duração total: 25 segundos.
    ⚠️ Nota: Apenas dados reais até 2025-11-13 foram escritos.
 === Execução terminada em 2025-11-12 12:23:57 ===
 Duração total: 24 segundos.
+=== Execução Python iniciada em 2025-11-12 13:26:55 ===
+✅ Bibliotecas carregadas
+ℹ️ Data de início da atualização definida para: 2025-10-01
+⚠️ MODO: Apenas dados reais OMIE (sem futuros)
+
+⏳ Passo 1: A ler e combinar dados OMIE (todos quarto-horários)...
+   - 1a: A ler 'MIBEL.xlsx'...
+   - 1b: A ler dados recentes (ACUM)...
+   - 1c: A ler dados do dia seguinte (INDICADORES)...
+   - 1d: A combinar fontes de dados...
+✅ Todas as fontes de dados OMIE foram combinadas.
+   📅 Última data com dados: 2025-11-13
+
+⏳ Passo 2: A criar estrutura completa até 2026...
+   - Dados reais até: 2025-11-13
+   - Estrutura criada até: 2026-12-31
+   - Registos com dados reais: 35137
+   - Registos vazios (futuros): 4608
+
+⏳ Passo 3: A converter para hora de Portugal...
+✅ 35036 registos totais preparados em hora de Portugal.
+   - Com dados reais: 30428
+   - Vazios (NaN): 4608
+✅ Todos os dias têm número de quartos esperado (92, 96 ou 100).
+
+⏳ Passo 4: A atualizar o ficheiro 'Simulador_☀️_Autoconsumo_Tiago_Felicia.xlsx'...
+✅ O ficheiro Excel foi atualizado com sucesso!
+   Data_Valores_OMIE = 2025-11-13
+   ⚠️ Nota: Apenas dados reais até 2025-11-13 foram escritos.
+=== Execução terminada em 2025-11-12 13:27:16 ===
+Duração total: 21 segundos.
