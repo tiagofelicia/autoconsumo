@@ -11,7 +11,7 @@ print("✅ Bibliotecas carregadas")
 # ===================================================================
 # ---- CONFIGURAÇÕES ----
 # ===================================================================
-DATA_INICIO_ATUALIZACAO = pd.to_datetime("2025-10-01")
+DATA_INICIO_ATUALIZACAO = pd.to_datetime("2025-11-15")
 FICHEIRO_EXCEL = "Simulador_☀️_Autoconsumo_Tiago_Felicia.xlsx"
 ABA_EXCEL = "OMIE_CICLOS"
 COLUNA_PARA_ESCREVER = 8 # Coluna H
@@ -188,4 +188,5 @@ def run_update_process():
 
 if __name__ == "__main__":
     run_update_process()
+
 
