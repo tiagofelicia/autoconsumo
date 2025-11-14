@@ -4,7 +4,7 @@ name: Atualizar Dados MIBEL (Autoconsumo)
 on:
   schedule:
     # Horário VERÃO (WEST=UTC+1) -> 13:00 (Local)
-    - cron: '00 12 * * *'
+    #- cron: '00 12 * * *'
     # Horário INVERNO (WET=UTC+0) -> 13:00 (Local)
     - cron: '00 13 * * *'
 
