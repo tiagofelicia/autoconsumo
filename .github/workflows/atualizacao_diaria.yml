@@ -3,10 +3,9 @@ name: Atualizar MIBEL e Autoconsumo (Fase 1 e 2)
 
 on:
   schedule:
-    # O seu agendamento original (13:00 Local)
-    # Horário VERÃO (WEST=UTC+1) -> 12:00 UTC
+    # Horário VERÃO (WEST=UTC+1) -> 13:00 (Local)
     - cron: '00 12 * * *'
-    # Horário INVERNO (WET=UTC+0) -> 13:00 UTC
+    # Horário INVERNO (WET=UTC+0) -> 13:00 (Local)
     - cron: '00 13 * * *'
 
   workflow_dispatch: # Permite execução manual
@@ -90,7 +89,7 @@ jobs:
         if: steps.commit_fase1.outputs.changes_detected == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "☀️ BOT: Atualização (Fase 2) Simulador Autoconsumo e Log"
+          commit_message: "☀️ BOT: Atualização Simulador Autoconsumo e Log"
           file_pattern: "Simulador_☀️_Autoconsumo_Tiago_Felicia.xlsx logs/autoconsumo_atualizacao.log"
 
       # =========================================================
