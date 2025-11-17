@@ -1,0 +1,88 @@
+# Nome descritivo do workflow
+name: Atualizar MIBEL e Autoconsumo (Fase 1 e 2)
+
+on:
+  schedule:
+    # O seu agendamento original para este script
+    # Horário VERÃO (WEST=UTC+1) -> 13:00 (Local)
+    - cron: '00 12 * * *'
+    # Horário INVERNO (WET=UTC+0) -> 13:00 (Local)
+    - cron: '00 13 * * *'
+
+  workflow_dispatch: # Permite execução manual
+
+jobs:
+  build-and-commit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Necessário para fazer commit
+
+    steps:
+      # 1. Checkout do código
+      - name: Checkout do Repositório
+        uses: actions/checkout@v4
+
+      # 2. Configura Python
+      - name: Configurar Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # 3. Instala dependências
+      - name: Instalar dependências
+        run: |
+          python -m pip install --upgrade pip
+          # Assumindo que o requirements.txt tem pandas, numpy, requests, openpyxl
+          pip install -r requirements.txt
+
+      # =========================================================
+      # 4. EXECUTAR FASE 1 (Com Logging)
+      # =========================================================
+      - name: Executar Fase 1 (atualizar_mibel_ano_atual_ACUM.py)
+        run: |
+          mkdir -p logs
+          echo "=== FASE 1 (MIBEL CSV) INICIADA: $(date) ===" >> logs/autoconsumo_atualizacao.log
+          python scripts/atualizar_mibel_ano_atual_ACUM.py >> logs/autoconsumo_atualizacao.log 2>&1
+          echo "=== FASE 1 (MIBEL CSV) TERMINADA: $(date) ===" >> logs/autoconsumo_atualizacao.log
+
+      # =========================================================
+      # 5. COMMIT FASE 1 (A Fonte de Dados)
+      # =========================================================
+      - name: Fazer commit do MIBEL_ano_atual_ACUM.csv
+        id: commit_fase1 # ID CRÍTICO para os passos seguintes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "BOT: Atualização (Fase 1) MIBEL_ano_atual_ACUM.csv"
+          file_pattern: data/MIBEL_ano_atual_ACUM.csv
+
+      # =========================================================
+      # 6. EXECUTAR FASE 2 (CONDICIONAL e Com Logging)
+      # =========================================================
+      - name: Executar Fase 2 (atualizar_autoconsumo_MIBEL.py)
+        # SÓ CORRE SE O PASSO 'commit_fase1' DETETOU MUDANÇAS
+        if: steps.commit_fase1.outputs.changes_detected == 'true'
+        run: |
+          echo "=== FASE 2 (AUTOCONSUMO) INICIADA: $(date) ===" >> logs/autoconsumo_atualizacao.log
+          python scripts/atualizar_autoconsumo_MIBEL.py >> logs/autoconsumo_atualizacao.log 2>&1
+          echo "=== FASE 2 (AUTOCONSUMO) TERMINADA: $(date) ===" >> logs/autoconsumo_atualizacao.log
+
+      # =========================================================
+      # 7. COMMIT FASE 2 (Ficheiro Excel Final)
+      # =========================================================
+      - name: Fazer commit do Simulador_Autoconsumo.xlsx
+        # SÓ CORRE SE A FASE 1 DETETOU MUDANÇAS
+        if: steps.commit_fase1.outputs.changes_detected == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "☀️ BOT: Atualização (Fase 2) Simulador Autoconsumo"
+          file_pattern: "Simulador_☀️_Autoconsumo_Tiago_Felicia.xlsx"
+
+      # =========================================================
+      # 8. UPLOAD DO LOG
+      # =========================================================
+      - name: Fazer upload do log como artefacto
+        if: always() # Corre sempre, mesmo que um passo falhe
+        uses: actions/upload-artifact@v4
+        with:
+          name: log-atualizacao-autoconsumo
+          path: logs/autoconsumo_atualizacao.log
