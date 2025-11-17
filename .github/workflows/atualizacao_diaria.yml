@@ -3,36 +3,46 @@ name: Atualizar MIBEL e Autoconsumo (Fase 1 e 2)
 
 on:
   schedule:
-    # O seu agendamento original para este script
-    # Horário VERÃO (WEST=UTC+1) -> 13:00 (Local)
+    # O seu agendamento original (13:00 Local)
+    # Horário VERÃO (WEST=UTC+1) -> 12:00 UTC
     - cron: '00 12 * * *'
-    # Horário INVERNO (WET=UTC+0) -> 13:00 (Local)
+    # Horário INVERNO (WET=UTC+0) -> 13:00 UTC
     - cron: '00 13 * * *'
 
   workflow_dispatch: # Permite execução manual
 
 jobs:
-  build-and-commit:
+  run-python-job:
+    name: Executar Atualização MIBEL e Autoconsumo
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Necessário para fazer commit
+      contents: write # Necessário para fazer commit das alterações
 
     steps:
-      # 1. Checkout do código
-      - name: Checkout do Repositório
+      - name: Checkout do repositório
         uses: actions/checkout@v4
 
-      # 2. Configura Python
-      - name: Configurar Python 3.12
+      # --- CONFIGURAÇÃO DO AMBIENTE PYTHON ---
+      - name: Configurar Python 3.11
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.11'
 
-      # 3. Instala dependências
+      # --- CACHE E INSTALAÇÃO DE DEPENDÊNCIAS PYTHON ---
+      - name: Cache das dependências Python
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          # Assumindo que tem um requirements.txt com pandas, numpy, requests, openpyxl
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Instalar dependências
         run: |
           python -m pip install --upgrade pip
-          # Assumindo que o requirements.txt tem pandas, numpy, requests, openpyxl
+          # Se não tiver um requirements.txt, instale manualmente:
+          # pip install pandas numpy requests openpyxl
           pip install -r requirements.txt
 
       # =========================================================
@@ -53,7 +63,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "BOT: Atualização (Fase 1) MIBEL_ano_atual_ACUM.csv"
-          file_pattern: data/MIBEL_ano_atual_ACUM.csv
+          file_pattern: "data/MIBEL_ano_atual_ACUM.csv"
 
       # =========================================================
       # 6. EXECUTAR FASE 2 (CONDICIONAL e Com Logging)
@@ -62,26 +72,42 @@ jobs:
         # SÓ CORRE SE O PASSO 'commit_fase1' DETETOU MUDANÇAS
         if: steps.commit_fase1.outputs.changes_detected == 'true'
         run: |
-          echo "=== FASE 2 (AUTOCONSUMO) INICIADA: $(date) ===" >> logs/autoconsumo_atualizacao.log
+          echo "=== FASE 2 (AUTOCONSUMO) INICIADA (Houve Mudanças): $(date) ===" >> logs/autoconsumo_atualizacao.log
           python scripts/atualizar_autoconsumo_MIBEL.py >> logs/autoconsumo_atualizacao.log 2>&1
           echo "=== FASE 2 (AUTOCONSUMO) TERMINADA: $(date) ===" >> logs/autoconsumo_atualizacao.log
+      
+      - name: Registar que a Fase 2 foi ignorada
+        # SÓ CORRE SE O PASSO 'commit_fase1' NÃO DETETOU MUDANÇAS
+        if: steps.commit_fase1.outputs.changes_detected == 'false'
+        run: |
+          echo "=== FASE 2 (AUTOCONSUMO) IGNORADA (Sem Mudanças na Fase 1): $(date) ===" >> logs/autoconsumo_atualizacao.log
 
       # =========================================================
-      # 7. COMMIT FASE 2 (Ficheiro Excel Final)
+      # 7. COMMIT FASE 2 (Ficheiro Excel e Log)
       # =========================================================
-      - name: Fazer commit do Simulador_Autoconsumo.xlsx
+      - name: Fazer commit dos ficheiros da Fase 2 (Excel e Log)
         # SÓ CORRE SE A FASE 1 DETETOU MUDANÇAS
         if: steps.commit_fase1.outputs.changes_detected == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "☀️ BOT: Atualização (Fase 2) Simulador Autoconsumo"
-          file_pattern: "Simulador_☀️_Autoconsumo_Tiago_Felicia.xlsx"
+          commit_message: "☀️ BOT: Atualização (Fase 2) Simulador Autoconsumo e Log"
+          file_pattern: "Simulador_☀️_Autoconsumo_Tiago_Felicia.xlsx logs/autoconsumo_atualizacao.log"
 
       # =========================================================
-      # 8. UPLOAD DO LOG
+      # 8. COMMIT SÓ DO LOG (Se nada mais mudou)
+      # =========================================================
+      - name: Fazer commit apenas do Log (se a Fase 2 foi ignorada)
+        if: steps.commit_fase1.outputs.changes_detected == 'false'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "BOT: Log de verificação (sem alterações de dados)"
+          file_pattern: "logs/autoconsumo_atualizacao.log"
+
+      # =========================================================
+      # 9. UPLOAD DO ARTEFACTO
       # =========================================================
       - name: Fazer upload do log como artefacto
-        if: always() # Corre sempre, mesmo que um passo falhe
+        if: always() # Corre sempre
         uses: actions/upload-artifact@v4
         with:
           name: log-atualizacao-autoconsumo
