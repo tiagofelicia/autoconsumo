@@ -22,8 +22,8 @@ from calendar import monthrange
 
 st.set_page_config(page_title="Simulador de Autoconsumo Solar Fotovoltaico - Portugal | Tiago Felícia", page_icon="☀️", layout="wide",initial_sidebar_state="collapsed")
 
-# --- Carregar ficheiro Excel do GitHub ---
-url_excel = "https://github.com/tiagofelicia/autoconsumo/raw/refs/heads/main/Simulador_%E2%98%80%EF%B8%8F_Autoconsumo_Tiago_Felicia.xlsx"
+# --- Carregar ficheiro Excel do Hugging Face ---
+url_excel = "https://huggingface.co/spaces/tiagofelicia/simulador-autoconsumo/resolve/main/%E2%98%80%EF%B8%8F_Autoconsumo_Tiago_Felicia.xlsx"
 OMIE_CICLOS, CONSTANTES = proc_dados.carregar_dados_excel(url_excel)
 
 
