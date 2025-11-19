@@ -98,7 +98,7 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          FICHEIRO_EXCEL="Simulador_☀️_Autoconsumo_Tiago_Felicia.xlsx"
+          FICHEIRO_EXCEL="☀️_Autoconsumo_Tiago_Felicia.xlsx"
           REPO_HF="tiagofelicia/simulador-autoconsumo"
           
           echo "Clonando o repositório $REPO_HF..."
