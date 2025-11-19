@@ -10,7 +10,7 @@ print("✅ Bibliotecas carregadas")
 # ===================================================================
 # ---- CONFIGURAÇÕES ----
 # ===================================================================
-FICHEIRO_EXCEL = "Simulador_☀️_Autoconsumo_Tiago_Felicia.xlsx"
+FICHEIRO_EXCEL = "☀️_Autoconsumo_Tiago_Felicia.xlsx"
 ABA_EXCEL = "OMIE_CICLOS"
 COLUNA_PARA_ESCREVER = 8 # Coluna H
 FICHEIRO_MIBEL_CSV = "data/MIBEL_ano_atual_ACUM.csv"
