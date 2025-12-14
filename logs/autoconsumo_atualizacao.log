@@ -1485,3 +1485,59 @@
    Data_Valores_OMIE = 2025-12-14
    ⚠️ Nota: Apenas dados reais até 2025-12-14 foram escritos.
 === FASE 2 (AUTOCONSUMO) TERMINADA: Sat Dec 13 13:20:29 UTC 2025 ===
+=== FASE 1 (MIBEL CSV) INICIADA: Sun Dec 14 13:20:12 UTC 2025 ===
+
+🔵 🚀 A iniciar atualização MIBEL
+
+🔵 [LIVE] A extrair dados ACUM + INDICADORES
+       • [ACUM] A descarregar…
+       • [ACUM] OK (35137 registos)
+       • [ACUM] Intervalo temporal: 2024-12-13 → 2025-12-14
+       • [INDICADORES] A descarregar…
+       • [INDICADORES] OK, dia 2025-12-15 (96 registos)
+
+🔵 [HISTÓRICO] A carregar histórico local
+   - ✔️ CSV carregado (35137 registos)
+
+🔵 [PLANO A] ACUM válido — usar como base principal
+   - Última data na base consolidada: 2025-12-15
+   - INDICADORES disponível para: 2025-12-15
+   - ✅ O dia dos INDICADORES (2025-12-15) já foi integrado via Download Live.
+
+🔵 [FINAL] A combinar e guardar
+   - ℹ️ Backup ignorado (GitHub Actions)
+   - ✅ Atualização concluída: 35233 registos
+   -    📅 Dados de: 2024-12-13 até 2025-12-15
+   - 🏁 FIM
+=== FASE 1 (MIBEL CSV) TERMINADA: Sun Dec 14 13:20:14 UTC 2025 ===
+=== FASE 2 (AUTOCONSUMO) INICIADA (Houve Mudanças): Sun Dec 14 13:20:16 UTC 2025 ===
+✅ Bibliotecas carregadas
+ℹ️ Fonte de dados: 'data/MIBEL_ano_atual_ACUM.csv'
+⚠️ MODO: Apenas dados reais (sem futuros)
+
+⏳ Passo 1: A ler dados históricos do 'data/MIBEL_ano_atual_ACUM.csv'...
+✅ 35233 registos históricos (com dados) lidos.
+   📅 Última data com dados: 2025-12-15
+
+⏳ Passo 2: A criar estrutura completa até 2026...
+   - Dados reais até: 2025-12-15
+   - Estrutura criada até: 2025-12-31
+   - Registos com dados reais: 35233
+   - Registos vazios (futuros): 1536
+
+⏳ Passo 3: A converter para hora de Portugal...
+✅ 35036 registos totais preparados em hora de Portugal.
+   - Com dados reais: 33500
+   - Vazios (NaN): 1536
+✅ Todos os dias têm número de quartos esperado (92, 96 ou 100).
+
+⏳ Passo 4: A atualizar o ficheiro '☀️_Autoconsumo_Tiago_Felicia.xlsx'...
+   - A ler a pauta de tempo da aba 'OMIE_CICLOS' para alinhamento...
+   - A alinhar preços calculados com a pauta do Excel...
+   - 35036 preços (2025/2026) alinhados e prontos a escrever.
+   - A carregar '☀️_Autoconsumo_Tiago_Felicia.xlsx' para escrita...
+   - A escrever 35036 preços na Coluna 8 (H)...
+✅ O ficheiro Excel foi atualizado com sucesso!
+   Data_Valores_OMIE = 2025-12-15
+   ⚠️ Nota: Apenas dados reais até 2025-12-15 foram escritos.
+=== FASE 2 (AUTOCONSUMO) TERMINADA: Sun Dec 14 13:20:41 UTC 2025 ===
