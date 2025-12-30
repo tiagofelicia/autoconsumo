@@ -2387,3 +2387,63 @@
    Data_Valores_OMIE = 2025-12-30
    ⚠️ Nota: Apenas dados reais até 2025-12-30 foram escritos.
 === FASE 2 (AUTOCONSUMO) TERMINADA: Mon Dec 29 13:30:34 UTC 2025 ===
+=== FASE 1 (MIBEL CSV) INICIADA: Tue Dec 30 13:29:27 UTC 2025 ===
+
+🔵 🚀 A iniciar atualização MIBEL
+
+🔵 [LIVE] A extrair dados ACUM + INDICADORES
+       • [ACUM] A descarregar…
+       • [ACUM] OK (35137 registos)
+       • [ACUM] Intervalo temporal: 2024-12-24 → 2025-12-25
+       • [INDICADORES] A descarregar…
+       • [INDICADORES] OK, dia 2025-12-31 (96 registos)
+
+🔵 [HISTÓRICO] A carregar histórico local
+   - ✔️ CSV carregado (35425 registos)
+
+🔵 [PLANO A] ACUM válido — usar como base principal
+   - ⚠️ A recuperar 480 registos do local (gap entre ACUM e Hoje)...
+   -    Dias recuperados: [datetime.date(2025, 12, 26), datetime.date(2025, 12, 27), datetime.date(2025, 12, 28), datetime.date(2025, 12, 29), datetime.date(2025, 12, 30)]
+   - Última data na base consolidada: 2025-12-31
+   - INDICADORES disponível para: 2025-12-31
+   - ✅ O dia dos INDICADORES (2025-12-31) já foi integrado via Download Live.
+
+🔵 [FINAL] A combinar e guardar
+   - ℹ️ Backup ignorado (GitHub Actions)
+   - ✅ Atualização concluída: 35713 registos
+   -    📅 Dados de: 2024-12-24 até 2025-12-31
+   - 🏁 FIM
+=== FASE 1 (MIBEL CSV) TERMINADA: Tue Dec 30 13:29:29 UTC 2025 ===
+=== FASE 2 (AUTOCONSUMO) INICIADA (Houve Mudanças): Tue Dec 30 13:29:30 UTC 2025 ===
+/home/runner/work/autoconsumo/autoconsumo/scripts/atualizar_MIBEL_autoconsumo.py:84: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+  dados_completos_qh = pd.concat([dados_combinados_qh, futuro_qh], ignore_index=True)
+✅ Bibliotecas carregadas
+ℹ️ Fonte de dados: 'data/MIBEL_ano_atual_ACUM.csv'
+⚠️ MODO: Apenas dados reais (sem futuros)
+
+⏳ Passo 1: A ler dados históricos do 'data/MIBEL_ano_atual_ACUM.csv'...
+✅ 35713 registos históricos (com dados) lidos.
+   📅 Última data com dados: 2025-12-31
+
+⏳ Passo 2: A criar estrutura completa até 2026...
+   - Dados reais até: 2025-12-31
+   - Estrutura criada até: 2025-12-31
+   - Registos com dados reais: 35713
+   - Registos vazios (futuros): 0
+
+⏳ Passo 3: A converter para hora de Portugal...
+✅ 35036 registos totais preparados em hora de Portugal.
+   - Com dados reais: 35036
+   - Vazios (NaN): 0
+✅ Todos os dias têm número de quartos esperado (92, 96 ou 100).
+
+⏳ Passo 4: A atualizar o ficheiro '☀️_Autoconsumo_Tiago_Felicia.xlsx'...
+   - A ler a pauta de tempo da aba 'OMIE_CICLOS' para alinhamento...
+   - A alinhar preços calculados com a pauta do Excel...
+   - 35036 preços (2025/2026) alinhados e prontos a escrever.
+   - A carregar '☀️_Autoconsumo_Tiago_Felicia.xlsx' para escrita...
+   - A escrever 35036 preços na Coluna 8 (H)...
+✅ O ficheiro Excel foi atualizado com sucesso!
+   Data_Valores_OMIE = 2025-12-31
+   ⚠️ Nota: Apenas dados reais até 2025-12-31 foram escritos.
+=== FASE 2 (AUTOCONSUMO) TERMINADA: Tue Dec 30 13:29:59 UTC 2025 ===
