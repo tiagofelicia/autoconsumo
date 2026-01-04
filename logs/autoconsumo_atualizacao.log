@@ -2647,3 +2647,65 @@
    - 🏁 FIM
 === FASE 1 (MIBEL CSV) TERMINADA: Sat Jan  3 13:22:20 UTC 2026 ===
 === FASE 2 (AUTOCONSUMO) IGNORADA (Sem Mudanças na Fase 1): Sat Jan  3 13:22:20 UTC 2026 ===
+=== FASE 1 (MIBEL CSV) INICIADA: Sun Jan  4 13:23:01 UTC 2026 ===
+
+🔵 🚀 A iniciar atualização MIBEL
+
+🔵 [LIVE] A extrair dados ACUM + INDICADORES
+       • [ACUM] A descarregar…
+       • [ACUM] OK (672 registos)
+       • [ACUM] Intervalo temporal: 2025-12-29 → 2026-01-04
+       • [INDICADORES] A descarregar…
+       • [INDICADORES] OK, dia 2026-01-05 (96 registos)
+
+🔵 [HISTÓRICO] A carregar histórico local
+   - ✔️ CSV carregado (36001 registos)
+
+🔵 [PLANO B] ACUM insuficiente (7 dias)
+   - Última data na base consolidada: 2026-01-03
+   - INDICADORES disponível para: 2026-01-05
+
+🔵 [DIÁRIO] A preencher buracos de 2026-01-04 até 2026-01-04
+       • 1 dia(s) a verificar…
+       • ✅ 1 dias recolhidos com sucesso.
+   - ➕ A adicionar INDICADORES do dia 2026-01-05 (Novo)...
+
+🔵 [FINAL] A combinar e guardar
+   - ℹ️ Backup ignorado (GitHub Actions)
+   - ✅ Atualização concluída: 36193 registos
+   -    📅 Dados de: 2024-12-24 até 2026-01-05
+   - 🏁 FIM
+=== FASE 1 (MIBEL CSV) TERMINADA: Sun Jan  4 13:23:04 UTC 2026 ===
+=== FASE 2 (AUTOCONSUMO) INICIADA (Houve Mudanças): Sun Jan  4 13:23:06 UTC 2026 ===
+/home/runner/work/autoconsumo/autoconsumo/scripts/atualizar_MIBEL_autoconsumo.py:84: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+  dados_completos_qh = pd.concat([dados_combinados_qh, futuro_qh], ignore_index=True)
+✅ Bibliotecas carregadas
+ℹ️ Fonte de dados: 'data/MIBEL_ano_atual_ACUM.csv'
+⚠️ MODO: Apenas dados reais (sem futuros)
+
+⏳ Passo 1: A ler dados históricos do 'data/MIBEL_ano_atual_ACUM.csv'...
+✅ 36193 registos históricos (com dados) lidos.
+   📅 Última data com dados: 2026-01-05
+
+⏳ Passo 2: A criar estrutura completa até 2026...
+   - Dados reais até: 2026-01-05
+   - Estrutura criada até: 2025-12-31
+   - Registos com dados reais: 36193
+   - Registos vazios (futuros): 0
+
+⏳ Passo 3: A converter para hora de Portugal...
+✅ 35516 registos totais preparados em hora de Portugal.
+   - Com dados reais: 35516
+   - Vazios (NaN): 0
+✅ Todos os dias têm número de quartos esperado (92, 96 ou 100).
+
+⏳ Passo 4: A atualizar o ficheiro '☀️_Autoconsumo_Tiago_Felicia.xlsx'...
+   - A ler a pauta de tempo da aba 'OMIE_CICLOS' para alinhamento...
+   - A alinhar preços calculados com a pauta do Excel...
+   - 35040 preços (2025/2026) alinhados e prontos a escrever.
+   - A carregar '☀️_Autoconsumo_Tiago_Felicia.xlsx' para escrita...
+   - A escrever 35040 preços na Coluna 8 (H)...
+✅ O ficheiro Excel foi atualizado com sucesso!
+   Data_Valores_OMIE = 2026-01-05
+   ⚠️ Nota: Apenas dados reais até 2026-01-05 foram escritos.
+=== FASE 2 (AUTOCONSUMO) TERMINADA: Sun Jan  4 13:23:35 UTC 2026 ===
