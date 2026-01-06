@@ -58,20 +58,29 @@ def run_update_process():
 
         print("\n⏳ Passo 2: A criar estrutura completa até 2026...")
         
-        def num_quartos_dia(data):
-            """Calcula número de quartos horários considerando DST"""
+        def num_quartos_dia(data_obj):
+            """
+            Calcula número de quartos horários considerando DST.
+            Usa a diferença entre dias para garantir que apanha 23h ou 25h.
+            """
             tz_es = 'Europe/Madrid'
-            dt0 = pd.Timestamp(f"{data} 00:00:00", tz=tz_es)
-            dt_fim = pd.Timestamp(f"{data} 00:00:00", tz=tz_es) + pd.Timedelta(days=1) - pd.Timedelta(seconds=1)
-            horas = (dt_fim - dt0).total_seconds() / 3600
-            return int(round((horas + (1/3600)) * 4)) # +1 segundo para arredondar
+            
+            # Garantir que estamos a usar apenas a data
+            dia_atual = data_obj.date() if hasattr(data_obj, 'date') else data_obj
+            dia_seguinte = dia_atual + pd.Timedelta(days=1)
+            
+            # Criar Timestamps localizados (00:00 hoje vs 00:00 amanhã)
+            dt0 = pd.Timestamp(f"{dia_atual} 00:00:00", tz=tz_es)
+            dt_next = pd.Timestamp(f"{dia_seguinte} 00:00:00", tz=tz_es)
+            
+            horas = (dt_next - dt0).total_seconds() / 3600
+            return int(round(horas * 4)) 
         
-        # Gerar estrutura completa de datas futuras (sem preços)
-        datas_futuras = pd.date_range(start=ultima_data_omie + pd.Timedelta(days=1), end='2025-12-31', freq='D')
+        datas_futuras = pd.date_range(start=ultima_data_omie + pd.Timedelta(days=1), end='2026-12-31', freq='D')
         
         futuro_qh = []
         for data in datas_futuras:
-            n_quartos = num_quartos_dia(data.date())
+            n_quartos = num_quartos_dia(data)
             for hora in range(1, n_quartos + 1):
                 futuro_qh.append({'Data': data, 'Hora': hora, 'Preco': np.nan})
         
@@ -85,7 +94,7 @@ def run_update_process():
         dados_completos_qh = dados_completos_qh.sort_values(['Data', 'Hora']).reset_index(drop=True)
         
         print(f"   - Dados reais até: {ultima_data_omie.date()}")
-        print(f"   - Estrutura criada até: 2025-12-31")
+        print(f"   - Estrutura criada até: 2026-12-31")
         print(f"   - Registos com dados reais: {len(dados_combinados_qh)}")
         print(f"   - Registos vazios (futuros): {len(futuro_qh)}")
         
@@ -110,8 +119,8 @@ def run_update_process():
         dados_finais_pt = dados_completos_qh.sort_values('datetime_pt').copy()
         dados_finais_pt['Hora_PT'] = dados_finais_pt.groupby('Data_PT').cumcount() + 1
         
-        # Selecionar apenas 2025 e 2026
-        dados_finais_pt = dados_finais_pt[dados_finais_pt['datetime_pt'].dt.year.isin([2025, 2026])].copy()
+        # Selecionar apenas 2026 e 2027
+        dados_finais_pt = dados_finais_pt[dados_finais_pt['datetime_pt'].dt.year.isin([2026, 2027])].copy()
         dados_finais_pt = dados_finais_pt[['Data_PT', 'Hora_PT', 'Preco']].rename(
             columns={'Data_PT': 'Data', 'Hora_PT': 'Hora'}
         )
@@ -161,7 +170,7 @@ def run_update_process():
         df_dados_pt_merge['Hora'] = df_dados_pt_merge['Hora'].astype(int)
         
         # ===================================================================
-        # Adicionar um marcador para saber quais linhas são de 2025/2026
+        # Adicionar um marcador para saber quais linhas são de 2026/2027
         df_dados_pt_merge['dados_calculados'] = True
         # ===================================================================
 
@@ -180,7 +189,7 @@ def run_update_process():
         # 6. FILTRAR apenas os dados que TÊM o marcador 'dados_calculados'
         dados_para_escrever = df_final_excel[df_final_excel['dados_calculados'] == True].copy()
         
-        print(f"   - {len(dados_para_escrever)} preços (2025/2026) alinhados e prontos a escrever.")
+        print(f"   - {len(dados_para_escrever)} preços (2026/2027) alinhados e prontos a escrever.")
 
         # 7. Escrever no ficheiro Excel (de forma seletiva)
         print(f"   - A carregar '{FICHEIRO_EXCEL}' para escrita...")
