@@ -5709,3 +5709,31 @@
    Data_Valores_OMIE = 2026-02-28
    ⚠️ Nota: Apenas dados reais até 2026-02-28 foram escritos.
 === FASE 2 (AUTOCONSUMO) TERMINADA: Fri Feb 27 13:51:33 UTC 2026 ===
+=== FASE 1 (MIBEL CSV) INICIADA: Sat Feb 28 13:29:42 UTC 2026 ===
+
+🔵 🚀 A iniciar atualização MIBEL
+
+🔵 [LIVE] A extrair dados ACUM + INDICADORES
+       • [ACUM] A descarregar…
+       • [ACUM] OK (35137 registos)
+       • [ACUM] Intervalo temporal: 2025-02-27 → 2026-02-28
+       • [INDICADORES] A descarregar…
+       • [INDICADORES] OK, dia 2026-02-28 (96 registos)
+
+🔵 [HISTÓRICO] A carregar histórico local
+   - ✔️ CSV carregado (35137 registos)
+
+🔵 [PLANO A] ACUM válido — usar como base principal
+   - ⚠️ A recuperar 96 registos do local (gap entre ACUM e Hoje)...
+   -    Dias recuperados: [datetime.date(2026, 2, 28)]
+   - Última data na base consolidada: 2026-02-28
+   - INDICADORES disponível para: 2026-02-28
+   - ✅ O dia dos INDICADORES (2026-02-28) já foi integrado via Download Live.
+
+🔵 [FINAL] A combinar e guardar
+   - ℹ️ Backup ignorado (GitHub Actions)
+   - ✅ Atualização concluída: 35137 registos
+   -    📅 Dados de: 2025-02-27 até 2026-02-28
+   - 🏁 FIM
+=== FASE 1 (MIBEL CSV) TERMINADA: Sat Feb 28 13:29:45 UTC 2026 ===
+=== FASE 2 (AUTOCONSUMO) IGNORADA (Sem Mudanças na Fase 1): Sat Feb 28 13:29:45 UTC 2026 ===
